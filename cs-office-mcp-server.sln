@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35004.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cs-office-mcp-server", "cs-office-mcp-server\cs-office-mcp-server.csproj", "{9454384B-C3C1-4081-9D15-69BD37CBC5E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTools", "TestTools\TestTools.csproj", "{B1241AB5-2B9E-462D-A265-380559354EB7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9454384B-C3C1-4081-9D15-69BD37CBC5E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9454384B-C3C1-4081-9D15-69BD37CBC5E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9454384B-C3C1-4081-9D15-69BD37CBC5E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9454384B-C3C1-4081-9D15-69BD37CBC5E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1241AB5-2B9E-462D-A265-380559354EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1241AB5-2B9E-462D-A265-380559354EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1241AB5-2B9E-462D-A265-380559354EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1241AB5-2B9E-462D-A265-380559354EB7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BBF17AD-1006-403A-AF53-6EA9506D867B}
+	EndGlobalSection
+EndGlobal
