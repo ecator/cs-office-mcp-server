@@ -10,7 +10,7 @@
     <Company>ecat</Company>
     <Description>Windows MCP Server for operating Office files</Description>
     <Title>OfficeMcpServer</Title>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

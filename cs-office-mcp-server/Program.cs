@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
+using ModelContextProtocol.Protocol;
 using System.ComponentModel;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -13,5 +14,21 @@ builder.Logging.AddConsole(consoleLogOptions =>
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
-    .WithToolsFromAssembly();
+    .WithToolsFromAssembly()
+    .WithListResourcesHandler(async (ctx, ct) =>
+    {
+        return new ListResourcesResult
+        {
+            Resources = []
+        };
+    })
+    .WithListPromptsHandler(async (request, cancellationToken) =>
+    {
+        return new()
+        {
+            NextCursor = null,
+            Prompts = [],
+        };
+    });
+
 await builder.Build().RunAsync();
