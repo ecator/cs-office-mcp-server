@@ -29,6 +29,12 @@ namespace TestTools
             var sheetName = "Sheet2";
             var values = ExcelTools.Read(fullName, sheetName, "A", 1, "A", null, password);
             TestContext.WriteLine(string.Join("\n",values.Select(item=>$"{item.Key}={Convert.ToString(item.Value)}")));
+            values = ExcelTools.Read(fullName, sheetName, "A", 1, null, null, password);
+            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+            values = ExcelTools.Read(fullName, sheetName, "A", 1, null, 1, password);
+            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+            values = ExcelTools.Read(fullName, sheetName, "AZ", 100, null, null, password);
+            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
 
 
         }
