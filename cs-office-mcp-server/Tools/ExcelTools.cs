@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 using ModelContextProtocol.Server;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.ComponentModel;
-using ModelContextProtocol;
-using Microsoft.Office.Interop.Excel;
-using System.Runtime.InteropServices;
 
 namespace OfficeServer.Tools;
 
@@ -38,9 +35,9 @@ public static class ExcelTools
     public static Dictionary<string, object> Read([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The first column as a letter.(such as A)")] string startColumn = "A"
-        , [Description("The first row number.")] decimal startRow = 1
+        , [Description("The first row number.")] int startRow = 1
         , [Description("The last column as a letter.(such as Z) If empty, then use xlToRight relative to startColumn")] string? endColumn = null
-        , [Description("The last row number. If empty, then use xlDown relative to startRow")] decimal? endRow = null
+        , [Description("The last row number. If empty, then use xlDown relative to startRow")] int? endRow = null
         , [Description("The password of the Excel file, if there is one.")] string password = null)
     {
         var values = new Dictionary<string, object>();
