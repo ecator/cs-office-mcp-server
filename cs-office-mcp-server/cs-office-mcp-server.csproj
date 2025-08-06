@@ -6,11 +6,14 @@
     <RootNamespace>OfficeServer</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Authors>ecat</Authors>
-    <Company>ecat</Company>
+    <Authors>Martin</Authors>
+    <Company>Martin Cat</Company>
     <Description>Windows MCP Server for operating Office files</Description>
     <Title>OfficeMcpServer</Title>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
+    <PackageProjectUrl>https://github.com/ecator/cs-office-mcp-server</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ecator/cs-office-mcp-server</RepositoryUrl>
+    <Copyright>© 2025 Martin Cat. All Rights Reserved.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
