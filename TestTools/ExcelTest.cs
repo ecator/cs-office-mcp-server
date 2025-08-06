@@ -2,70 +2,86 @@ using OfficeServer.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reflection;
 
-namespace TestTools
+namespace TestTools;
+
+[TestClass]
+public class ExcelTest: TestBase
 {
-    [TestClass]
-    public class ExcelTest
+
+    [TestMethod]
+    [DataRow("wk2-password-223.xlsx","223")]
+    public void TestGetSheets(string fileName,string password)
     {
 
-        public string AssemblyDirectory { get=> Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); }
-        public string TestDataDirectory { get =>Path.GetFullPath(Path.Combine(AssemblyDirectory, @"..\..\..\..\TestData")); }
-        public TestContext TestContext { get; set; }
-        [TestMethod]
-        public void TestGetSheets()
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var sheets = ExcelTools.GetSheets(fullName, password);
+        TestContext.WriteLine(string.Join(",", sheets));
+
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("test.txt")]
+    public void TestFileNameCheck(string name)
+    {
+
+        var fullName = Path.Combine(TestDataDirectory, name);
+        try
         {
-
-            var fullName = Path.Combine(TestDataDirectory, "wk2-password-223.xlsx");
-            var sheets = ExcelTools.GetSheets(fullName, "223");
-            TestContext.WriteLine(string.Join(",", sheets));
-
+            var sheets = ExcelTools.GetSheets(fullName);
+        }catch(Exception ex)
+        {
+            TestContext.WriteLine(ex.Message);
         }
+        
 
-        [TestMethod]
-        public void TestRead()
+    }
+
+    [TestMethod]
+    [DataRow("wk1.xlsm", "Sheet1", "B", 1, "B", 1, null)]
+    [DataRow("wk1.xlsm", "Sheet1", "B", 1, null, null, null)]
+    [DataRow("wk1.xlsm", "Sheet1", "B", 1, "B", null, null)]
+    [DataRow("wk1.xlsm", "Sheet1", "B", 1, null, 2, null)]
+    [DataRow("wk1.xlsm", "Sheet1", "C", 1, null, null, null)]
+    public void TestRead(string fileName, string sheetName, string startColumn, int startRow, string endColumn, int? endRow, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var values = ExcelTools.Read(fullName, sheetName, startColumn, startRow, endColumn, endRow, password);
+        TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+    }
+
+    [TestMethod]
+    [DataRow("wk1.xlsm", "Sheet1", null)]
+    public void TestReadUsedRange(string fileName, string sheetName, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var values = ExcelTools.ReadUsedRange(fullName, sheetName, password);
+        TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+    }
+
+    [TestMethod]
+    public void TestWrite()
+    {
+        var fullName = Path.Combine(TestDataDirectory, "wk1.xlsm");
+        var password = "";
+        var sheetName = "Sheet2";
+        var data = new string[][]
         {
-            var fullName = Path.Combine(TestDataDirectory, "wk1.xlsm");
-            var password = "";
-            var sheetName = "Sheet2";
-            var values = ExcelTools.Read(fullName, sheetName, "A", 1, "A", null, password);
-            TestContext.WriteLine(string.Join("\n",values.Select(item=>$"{item.Key}={Convert.ToString(item.Value)}")));
-            values = ExcelTools.Read(fullName, sheetName, "A", 1, null, null, password);
-            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
-            values = ExcelTools.Read(fullName, sheetName, "A", 1, null, 1, password);
-            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
-            values = ExcelTools.Read(fullName, sheetName, "AZ", 100, null, null, password);
-            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+            new []{"1","ÄãºÃ",DateTime.Now.ToString() },
+            new []{"2","¤³¤ó¤Ë¤Á¤Ï", DateTime.Now.ToString() },
+            new []{"2","ÌìšÝ¤¬¤¤¤¤¤«¤é\nÉ¢ši¤·¤·¤Þ¤·¤ç¤¦¡£", DateTime.Now.ToString() }
+        };
+        var ok = ExcelTools.Write(fullName, sheetName, data, "B", 3, password);
+        Assert.AreEqual(ok, "ok");
 
-
-        }
-
-        [TestMethod]
-        public void TestReadUsedRange()
+        var values = ExcelTools.Read(fullName, sheetName, "B", 3, null, null, password);
+        for (var i = 0; i < data.Length; i++)
         {
-            var fullName = Path.Combine(TestDataDirectory, "wk0.xls");
-            var password = "";
-            var sheetName = "Sheet1";
-            var values = ExcelTools.ReadUsedRange(fullName, sheetName);
-            TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
-
-
-        }
-
-        [TestMethod]
-        public void TestWrite()
-        {
-            var fullName = Path.Combine(TestDataDirectory, "wk1.xlsm");
-            var password = "";
-            var sheetName = "Sheet2";
-            var data = new string[][]
+            for (var j = 0; j < data[i].Length; j++)
             {
-                new []{"1","ÄãºÃ",DateTime.Now.ToString() },
-                new []{"2","¤³¤ó¤Ë¤Á¤Ï", DateTime.Now.ToString() }
-            };
-            var ok = ExcelTools.Write(fullName, sheetName, data, "A", 1, password);
-            Assert.AreEqual(ok, "ok");
-
-
+                Assert.AreEqual(Convert.ToString(data[i][j]), Convert.ToString(values[$"{(char)('B' + j)}{3 + i}"]));
+            }
         }
+
     }
 }
