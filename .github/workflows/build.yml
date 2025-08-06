@@ -33,6 +33,7 @@ jobs:
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Build the application
       run: |
+        dotnet add package Microsoft.NETCore.App.Runtime.win-x64
         dotnet restore cs-office-mcp-server\cs-office-mcp-server.csproj /p:RuntimeIdentifier=win-x64
         msbuild cs-office-mcp-server\cs-office-mcp-server.csproj /t:Publish /p:PublishProfile=cs-office-mcp-server\Properties\PublishProfiles\FolderProfile.pubxml
 
