@@ -33,13 +33,11 @@ jobs:
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Build the application
       run: |
-        dotnet add package Microsoft.NETCore.App.Runtime.win-x64
-        dotnet restore cs-office-mcp-server\cs-office-mcp-server.csproj /p:RuntimeIdentifier=win-x64
-        msbuild cs-office-mcp-server\cs-office-mcp-server.csproj /t:Publish /p:PublishProfile=cs-office-mcp-server\Properties\PublishProfiles\FolderProfile.pubxml
+        dotnet publish .\cs-office-mcp-server\cs-office-mcp-server.csproj  -c Release -r win-x64  --self-contained true -o win-x64
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: dist
-        path: cs-office-mcp-server\bin\Release\net8.0\publish\win-x64
+        path: win-x64
