@@ -33,7 +33,7 @@ jobs:
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Build the application
       run: |
-        dotnet publish .\cs-office-mcp-server\cs-office-mcp-server.csproj  -c Release -r win-x64  --self-contained true -o win-x64
+        dotnet publish .\cs-office-mcp-server\cs-office-mcp-server.csproj  -c Release -r win-x64 --self-contained true -o win-x64
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
@@ -41,3 +41,31 @@ jobs:
       with:
         name: dist
         path: win-x64
+  release:
+    needs: [build]
+    if: ${{ startsWith(github.ref,'refs/tags') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+      - name: Display structure of downloaded files and zip
+        run: |
+          ls -R
+          apt update && apt install -y zip
+          TAG_NAME="${{ github.ref }}"
+          TAG_NAME="${TAG_NAME#refs/tags/}"
+          zip -9 cs-office-mcp-server-win-x64-${TAG_NAME}.zip *
+        
+      - name: Create release
+        uses: docker://antonyurchenko/git-release:latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAFT_RELEASE: "false"
+          PRE_RELEASE: "false"
+          CHANGELOG_FILE: "none"
+          ALLOW_EMPTY_CHANGELOG: "true"
+          TAG_PREFIX_REGEX: "[v]"
+        with:
+          args: |
+            *.zip
