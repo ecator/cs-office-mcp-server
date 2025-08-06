@@ -62,7 +62,7 @@ public class ExcelTest: TestBase
     [TestMethod]
     public void TestWrite()
     {
-        var fullName = Path.Combine(TestDataDirectory, "wk1.xlsm");
+        var fullName = Path.Combine(TestDataDirectory, "wk-for-write.xlsm");
         var password = "";
         var sheetName = "Sheet2";
         var data = new string[][]

@@ -4,3 +4,4 @@ obj/
 *.csproj.user
 *.pubxml.user
 TestResults/*
+TestData/wk-for-write.xlsm
