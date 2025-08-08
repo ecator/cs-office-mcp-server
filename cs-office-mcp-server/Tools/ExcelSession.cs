@@ -19,7 +19,41 @@ namespace OfficeServer.Tools;
 public class ExcelSession : Session<Excel.Application>
 {
     
+    protected string[] allowedExtList = new string[]{ "xls", "xlsx", "xlsm" };
 
+    /// <summary>
+    /// Checks the validity of a full file name for an Excel file.
+    /// </summary>
+    /// <param name="fullName">The full path of the Excel file.</param>
+    /// <param name="needExist">Check if the file exists.</param>
+    /// <param name="checkFolder">Check whether the directory of the file exists.</param>
+    /// <returns></returns>
+    /// <exception cref="McpException"></exception>
+    public string CheckFullName(string fullName, bool needExist = true, bool checkFolder =true) {
+        if (string.IsNullOrEmpty(fullName))
+        {
+            throw new McpException($"The file name can not be empty.");
+        }
+        fullName = fullName.Replace("/", @"\");
+        if (!Regex.IsMatch(fullName, @"^(\\|[A-Za-z]:\\).+"))
+        {
+            throw new McpException($"The file name must be an absolute path or a network file.");
+        }
+        if (needExist && !File.Exists(fullName))
+        {
+            throw new McpException($"{fullName} not exist.");
+        }
+        if (checkFolder && !Directory.Exists(Path.GetDirectoryName(fullName)))
+        {
+            throw new McpException($"The folder of {fullName} not exist.");
+        }
+
+        if (!Regex.IsMatch(fullName, string.Format(@".+\.({0})$", string.Join("|", allowedExtList)), RegexOptions.IgnoreCase))
+        {
+            throw new McpException($"{fullName} is not a valid Excel file.\nCurrently supported formats are [{string.Join(",", allowedExtList)}].");
+        }
+        return fullName;
+    }
     /// <summary>
     /// Initializes a new Excel session.
     /// </summary>
@@ -49,24 +83,7 @@ public class ExcelSession : Session<Excel.Application>
     /// <returns></returns>
     public Excel.Workbook OpenWorkbook(string fullName, bool readOnly, string password)
     {
-        if (string.IsNullOrEmpty(fullName))
-        {
-            throw new McpException($"The file name can not be empty.");
-        }
-        fullName = fullName.Replace("/", @"\");
-        if (!Regex.IsMatch(fullName,@"^(https?:|\\|[A-Za-z]:\\).+"))
-        {
-            throw new McpException($"The file name must be an absolute path or a network file.");
-        }
-        if (!File.Exists(fullName))
-        {
-            throw new McpException($"{fullName} not exist.");
-        }
-        var allowedList = new string[]{ "xls", "xlsx", "xlsm" };
-        if (!Regex.IsMatch(fullName, string.Format(@".+\.({0})$", string.Join("|", allowedList)), RegexOptions.IgnoreCase))
-        {
-            throw new McpException($"{fullName} is not a valid Excel file.\nCurrently supported formats are [{string.Join(",", allowedList)}].");
-        }
+        fullName = CheckFullName(fullName);
         Excel.Workbook wk = null;
         try
         {
@@ -81,6 +98,34 @@ public class ExcelSession : Session<Excel.Application>
             {
                 wk = wks.Open(fullName, Excel.XlUpdateLinks.xlUpdateLinksNever, readOnly, Type.Missing, password);
             }
+        }
+        catch (Exception ex)
+        {
+            throw new McpException($"Failed to open Excel workbook: {ex.Message}", ex);
+        }
+        RegisterComObject(wk);
+        return wk;
+    }
+
+    /// <summary>
+    /// Add a new wokbook.
+    /// </summary>
+    /// <param name="sheetName">The name of the default sheet.</param>
+    /// <returns></returns>
+    public Excel.Workbook AddWorkbook(string sheetName)
+    {
+        Excel.Workbook wk = null;
+        try
+        {
+
+            Excel.Workbooks wks = Application.Workbooks;
+            RegisterComObject(wks);
+            wk = wks.Add();
+            Excel.Sheets shs = wk.Worksheets;
+            RegisterComObject(shs);
+            Excel.Worksheet sh = shs[1];
+            RegisterComObject(sh);
+            sh.Name = sheetName;
         }
         catch (Exception ex)
         {

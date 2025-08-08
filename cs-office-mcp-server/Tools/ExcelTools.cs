@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using ModelContextProtocol.Server;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.ComponentModel;
+using ModelContextProtocol;
+using System.Text.RegularExpressions;
 
 namespace OfficeServer.Tools;
 
@@ -79,7 +81,7 @@ public static class ExcelTools
         return values;
     }
 
-    [McpServerTool(Name = "excel_write"), Description("Write data into a cell or a range of cells of the specified worksheet.")]
+    [McpServerTool(Name = "excel_write"), Description("Write data into a cell or a range of cells of the specified worksheet to an existing Excel file.")]
     public static string Write([Description("The full path of the Excel file.")] string fullName
     , [Description("The sheet name of the Excel file.")] string sheetName
     , [Description("The data that needs to be written in.")] string[][] data
@@ -103,6 +105,65 @@ public static class ExcelTools
                 }
             }
             wk.Save();
+        }
+
+        return "ok";
+    }
+
+    [McpServerTool(Name = "excel_save"), Description("Save data into a cell or a range of cells of the specified worksheet as a new Excel file.")]
+    public static string Save([Description("The full path of the Excel file to save.")] string fullName
+, [Description("The sheet name of the Excel file.")] string sheetName
+, [Description("The data that needs to be saved.")] string[][]? data = null
+, [Description("The first column as a letter where the data is written.(such as A)")] string startColumn = "A"
+, [Description("The first row number where the data is written.")] decimal startRow = 1
+, [Description("The password of the Excel file, if it needs one.")] string? password = null)
+    {
+        using (var session = new ExcelSession())
+        {
+            fullName = session.CheckFullName(fullName, false, true);
+            var wk = session.AddWorkbook(sheetName);
+            Excel.Sheets shs = wk.Worksheets;
+            session.RegisterComObject(shs);
+            Excel.Worksheet sh = shs[1];
+            session.RegisterComObject(sh);
+            if(data != null)
+            {
+                var range = sh.Range[$"{startColumn}{startRow}"];
+                session.RegisterComObject(range);
+                for (var i = 0; i < data.Length; i++)
+                {
+                    for (var j = 0; j < data[i].Length; j++)
+                    {
+                        var cell = range.Offset[i, j];
+                        session.RegisterComObject(cell);
+                        cell.Value = data[i][j];
+                    }
+                }
+            }
+            var format = Excel.XlFileFormat.xlOpenXMLWorkbook;
+            switch (Path.GetExtension(fullName).ToLowerInvariant())
+            {
+                case ".xlsx":
+                    format = Excel.XlFileFormat.xlOpenXMLWorkbook;
+                    break;
+                case ".xlsm":
+                    format = Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled;
+                    break;
+                case ".xls":
+                    format = Excel.XlFileFormat.xlExcel8;
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported file format. Please use .xlsx or .xlsm or .xlsb.");
+            }
+            if (string.IsNullOrEmpty(password))
+            {
+                wk.SaveAs(fullName, format);
+            }
+            else
+            {
+                wk.SaveAs(fullName, format, password);
+            }
+            wk.Close();
         }
 
         return "ok";

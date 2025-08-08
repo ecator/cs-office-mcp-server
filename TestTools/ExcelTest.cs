@@ -24,15 +24,18 @@ public class ExcelTest: TestBase
     [DataRow("test.txt")]
     public void TestFileNameCheck(string name)
     {
-
+        var hasError = false;
         var fullName = Path.Combine(TestDataDirectory, name);
         try
         {
             var sheets = ExcelTools.GetSheets(fullName);
         }catch(Exception ex)
         {
+            hasError = true;
             TestContext.WriteLine(ex.Message);
         }
+
+        Assert.IsTrue(hasError);
         
 
     }
@@ -60,17 +63,20 @@ public class ExcelTest: TestBase
     }
 
     [TestMethod]
-    public void TestWrite()
+    [DataRow("write-0.xlsm", "Sheet111", null)]
+    [DataRow("write-0.xls", "Sheet123", "123")]
+    [DataRow("write-0.xlsx", "Sheet444", "4444")]
+
+    public void TestWrite(string fileName, string sheetName, string password)
     {
-        var fullName = Path.Combine(TestDataDirectory, "wk-for-write.xlsm");
-        var password = "";
-        var sheetName = "Sheet2";
+        var fullName = Path.Combine(TestDataDirectory, fileName);
         var data = new string[][]
         {
             new []{"1","你好",DateTime.Now.ToString() },
             new []{"2","こんにちは", DateTime.Now.ToString() },
-            new []{"2","天気がいいから\n散歩ししましょう。", DateTime.Now.ToString() }
+            new []{"3","天気がいいから\n散歩ししましょう。", DateTime.Now.ToString() }
         };
+        ExcelTools.Save(fullName, sheetName, null, "B", 3, password);
         var ok = ExcelTools.Write(fullName, sheetName, data, "B", 3, password);
         Assert.AreEqual(ok, "ok");
 
@@ -80,6 +86,34 @@ public class ExcelTest: TestBase
             for (var j = 0; j < data[i].Length; j++)
             {
                 Assert.AreEqual(Convert.ToString(data[i][j]), Convert.ToString(values[$"{(char)('B' + j)}{3 + i}"]));
+            }
+        }
+
+    }
+
+    [TestMethod]
+    [DataRow("save-1.xlsm", "Sheet1", null)]
+    [DataRow("save-1.xls", "Sheet223", "334")]
+    [DataRow("save-1.xlsx", "Sheet554", "554")]
+
+    public void TestSave(string fileName, string sheetName, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var data = new string[][]
+        {
+            new []{"1","你好",DateTime.Now.ToString() },
+            new []{"2","こんにちは", DateTime.Now.ToString() },
+            new []{"3", "油断大敵\n危ない。", DateTime.Now.ToString() }
+        };
+        var ok = ExcelTools.Save(fullName, sheetName, data, "A", 3, password);
+        Assert.AreEqual(ok, "ok");
+
+        var values = ExcelTools.Read(fullName, sheetName, "A", 3, null, null, password);
+        for (var i = 0; i < data.Length; i++)
+        {
+            for (var j = 0; j < data[i].Length; j++)
+            {
+                Assert.AreEqual(Convert.ToString(data[i][j]), Convert.ToString(values[$"{(char)('A' + j)}{3 + i}"]));
             }
         }
 
