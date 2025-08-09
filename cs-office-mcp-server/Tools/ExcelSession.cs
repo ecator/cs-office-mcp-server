@@ -108,7 +108,7 @@ public class ExcelSession : Session<Excel.Application>
     }
 
     /// <summary>
-    /// Add a new wokbook.
+    /// Add a new workbook.
     /// </summary>
     /// <param name="sheetName">The name of the default sheet.</param>
     /// <returns></returns>
@@ -133,6 +133,34 @@ public class ExcelSession : Session<Excel.Application>
         }
         RegisterComObject(wk);
         return wk;
+    }
+
+    /// <summary>
+    /// Add a new sheet to workbook.
+    /// </summary>
+    /// <param name="wk">Workbook</param>
+    /// <param name="sheetName">The name of the sheet that needs to be added. It will use the default name if empty.</param>
+    /// <returns></returns>
+    public Excel.Worksheet AddSheet(Excel.Workbook wk, string? sheetName = null)
+    {
+        Excel.Sheets shs;
+        Excel.Worksheet sh;
+        try
+        {
+            shs = wk.Worksheets;
+            RegisterComObject(shs);
+            sh = shs.Add();
+            RegisterComObject(sh);
+            if (!string.IsNullOrEmpty(sheetName))
+            {
+                sh.Name = sheetName;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new McpException($"Failed to add sheet: {ex.Message}", ex);
+        }
+        return sh;
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using OfficeServer.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Reflection;
+using System.Text;
 
 namespace TestTools;
 
@@ -63,12 +64,17 @@ public class ExcelTest: TestBase
     }
 
     [TestMethod]
-    [DataRow("write-0.xlsm", "Sheet111", null)]
-    [DataRow("write-0.xls", "Sheet123", "123")]
-    [DataRow("write-0.xlsx", "Sheet444", "4444")]
-
-    public void TestWrite(string fileName, string sheetName, string password)
+    [DataRow("write-0.xlsm", "Sheet111", null,false,false)]
+    [DataRow("write-0.xls", "Sheet123", "123", true, false)]
+    [DataRow("write-0.xlsx", "Sheet444", "4444", false, true)]
+    [DataRow("write-0.xlsx", "Sheet555", null, true, true)]
+    public void TestWrite(string fileName, string sheetName, string password, bool forceOverwriteFile ,bool forceOverwriteSheet)
     {
+        const string RESULT_NEW_FILE = "Successfully saved to a new file.";
+        const string RESULT_EXISTING_FILE = "Successfully saved to an existing file.";
+        const string RESULT_NEW_SHEET = "Successfully created a new sheet.";
+        var expectedResponse = new StringBuilder();
+        var response = string.Empty;
         var fullName = Path.Combine(TestDataDirectory, fileName);
         var data = new string[][]
         {
@@ -76,9 +82,42 @@ public class ExcelTest: TestBase
             new []{"2","¤³¤ó¤Ë¤Á¤Ï", DateTime.Now.ToString() },
             new []{"3","ÌìšÝ¤¬¤¤¤¤¤«¤é\nÉ¢ši¤·¤·¤Þ¤·¤ç¤¦¡£", DateTime.Now.ToString() }
         };
-        ExcelTools.Save(fullName, sheetName, null, "B", 3, password);
-        var ok = ExcelTools.Write(fullName, sheetName, data, "B", 3, password);
-        Assert.AreEqual(ok, "ok");
+        if (File.Exists(fullName))
+        {
+            File.Delete(fullName);
+        }
+        response = ExcelTools.Write(fullName, sheetName, null, "B", 3, password, forceOverwriteFile, forceOverwriteSheet);
+        expectedResponse.AppendLine(RESULT_NEW_FILE);
+        Assert.AreEqual(expectedResponse.ToString(), response);
+        response = ExcelTools.Write(fullName, sheetName, data, "B", 3, password, forceOverwriteFile, forceOverwriteSheet);
+        expectedResponse.Clear();
+        if (forceOverwriteFile)
+        {
+            expectedResponse.AppendLine(RESULT_NEW_FILE);
+        }
+        else
+        {
+            expectedResponse.AppendLine(RESULT_EXISTING_FILE);
+            if (forceOverwriteSheet)
+            {
+                expectedResponse.AppendLine(RESULT_NEW_SHEET);
+            }
+        }
+        Assert.AreEqual(expectedResponse.ToString(), response);
+
+        sheetName = sheetName + "1";
+        response = ExcelTools.Write(fullName, sheetName, data, "B", 3, password, forceOverwriteFile, forceOverwriteSheet);
+        expectedResponse.Clear();
+        if (forceOverwriteFile)
+        {
+            expectedResponse.AppendLine(RESULT_NEW_FILE);
+        }
+        else
+        {
+            expectedResponse.AppendLine(RESULT_EXISTING_FILE);
+            expectedResponse.AppendLine(RESULT_NEW_SHEET);
+        }
+        Assert.AreEqual(expectedResponse.ToString(), response);
 
         var values = ExcelTools.Read(fullName, sheetName, "B", 3, null, null, password);
         for (var i = 0; i < data.Length; i++)
@@ -91,31 +130,4 @@ public class ExcelTest: TestBase
 
     }
 
-    [TestMethod]
-    [DataRow("save-1.xlsm", "Sheet1", null)]
-    [DataRow("save-1.xls", "Sheet223", "334")]
-    [DataRow("save-1.xlsx", "Sheet554", "554")]
-
-    public void TestSave(string fileName, string sheetName, string password)
-    {
-        var fullName = Path.Combine(TestDataDirectory, fileName);
-        var data = new string[][]
-        {
-            new []{"1","ÄãºÃ",DateTime.Now.ToString() },
-            new []{"2","¤³¤ó¤Ë¤Á¤Ï", DateTime.Now.ToString() },
-            new []{"3", "ÓÍ¶Ï´ó”³\nÎ£¤Ê¤¤¡£", DateTime.Now.ToString() }
-        };
-        var ok = ExcelTools.Save(fullName, sheetName, data, "A", 3, password);
-        Assert.AreEqual(ok, "ok");
-
-        var values = ExcelTools.Read(fullName, sheetName, "A", 3, null, null, password);
-        for (var i = 0; i < data.Length; i++)
-        {
-            for (var j = 0; j < data[i].Length; j++)
-            {
-                Assert.AreEqual(Convert.ToString(data[i][j]), Convert.ToString(values[$"{(char)('A' + j)}{3 + i}"]));
-            }
-        }
-
-    }
 }

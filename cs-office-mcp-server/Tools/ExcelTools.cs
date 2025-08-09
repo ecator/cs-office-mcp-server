@@ -81,51 +81,50 @@ public static class ExcelTools
         return values;
     }
 
-    [McpServerTool(Name = "excel_write"), Description("Write data into a cell or a range of cells of the specified worksheet to an existing Excel file.")]
-    public static string Write([Description("The full path of the Excel file.")] string fullName
-    , [Description("The sheet name of the Excel file.")] string sheetName
-    , [Description("The data that needs to be written in.")] string[][] data
+    [McpServerTool(Name = "excel_write"), Description("Write data into a cell or a range of cells of the specified worksheet to an Excel file.")]
+    public static string Write([Description("The full path of the Excel file. It will be created if not exist.")] string fullName
+    , [Description("The sheet name of the Excel file. It will be created if not exist.")] string sheetName = "Sheet1"
+    , [Description("The data that needs to be written in.")] string[][]? data = null
     , [Description("The first column as a letter where the data is written.(such as A)")] string startColumn = "A"
     , [Description("The first row number where the data is written.")] decimal startRow = 1
-    , [Description("The password of the Excel file, if there is one.")] string? password = null)
+    , [Description("The password of the Excel file, if there is one.")] string? password = null
+    , [Description("Force overwrite to create a new one when the file exists.")] bool forceOverwriteFile = false
+    , [Description("Force overwrite to create a new one when the sheet exists.")] bool forceOverwriteSheet = false)
     {
-        using (var session = new ExcelSession())
-        {
-            var wk = session.OpenWorkbook(fullName, false, password);
-            var sh = session.GetSheet(wk, sheetName);
-            var range = sh.Range[$"{startColumn}{startRow}"];
-            session.RegisterComObject(range);
-            for (var i = 0; i < data.Length; i++)
-            {
-                for (var j = 0; j < data[i].Length; j++)
-                {
-                    var cell = range.Offset[i, j];
-                    session.RegisterComObject(cell);
-                    cell.Value = data[i][j];
-                }
-            }
-            wk.Save();
-        }
-
-        return "ok";
-    }
-
-    [McpServerTool(Name = "excel_save"), Description("Save data into a cell or a range of cells of the specified worksheet as a new Excel file.")]
-    public static string Save([Description("The full path of the Excel file to save.")] string fullName
-, [Description("The sheet name of the Excel file.")] string sheetName
-, [Description("The data that needs to be saved.")] string[][]? data = null
-, [Description("The first column as a letter where the data is written.(such as A)")] string startColumn = "A"
-, [Description("The first row number where the data is written.")] decimal startRow = 1
-, [Description("The password of the Excel file, if it needs one.")] string? password = null)
-    {
+        StringBuilder sb = new StringBuilder();
         using (var session = new ExcelSession())
         {
             fullName = session.CheckFullName(fullName, false, true);
-            var wk = session.AddWorkbook(sheetName);
-            Excel.Sheets shs = wk.Worksheets;
-            session.RegisterComObject(shs);
-            Excel.Worksheet sh = shs[1];
-            session.RegisterComObject(sh);
+            Excel.Workbook wk;
+            Excel.Worksheet sh;
+            bool newWk = false;
+            bool newSh = false;
+            if (File.Exists(fullName) && !forceOverwriteFile)
+            {
+                wk = session.OpenWorkbook(fullName, false, password);
+            }
+            else
+            {
+                newWk = true;
+                wk = session.AddWorkbook(sheetName);
+            }
+            try
+            {
+                sh = session.GetSheet(wk, sheetName);
+            }
+            catch
+            {
+                newSh = true;
+                sh = session.AddSheet(wk, sheetName);
+            }
+            if(!newWk && !newSh && forceOverwriteSheet)
+            {
+                newSh = true;
+                var shNew = session.AddSheet(wk);
+                sh.Delete();
+                sh = shNew;
+                sh.Name = sheetName;
+            }
             if(data != null)
             {
                 var range = sh.Range[$"{startColumn}{startRow}"];
@@ -140,32 +139,50 @@ public static class ExcelTools
                     }
                 }
             }
-            var format = Excel.XlFileFormat.xlOpenXMLWorkbook;
-            switch (Path.GetExtension(fullName).ToLowerInvariant())
+            if (newWk)
             {
-                case ".xlsx":
-                    format = Excel.XlFileFormat.xlOpenXMLWorkbook;
-                    break;
-                case ".xlsm":
-                    format = Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled;
-                    break;
-                case ".xls":
-                    format = Excel.XlFileFormat.xlExcel8;
-                    break;
-                default:
-                    throw new ArgumentException("Unsupported file format. Please use .xlsx or .xlsm or .xlsb.");
-            }
-            if (string.IsNullOrEmpty(password))
-            {
-                wk.SaveAs(fullName, format);
+                var format = Excel.XlFileFormat.xlOpenXMLWorkbook;
+                switch (Path.GetExtension(fullName).ToLowerInvariant())
+                {
+                    case ".xlsx":
+                        format = Excel.XlFileFormat.xlOpenXMLWorkbook;
+                        break;
+                    case ".xlsm":
+                        format = Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled;
+                        break;
+                    case ".xls":
+                        format = Excel.XlFileFormat.xlExcel8;
+                        break;
+                }
+                if (string.IsNullOrEmpty(password))
+                {
+                    wk.SaveAs(fullName, format);
+                }
+                else
+                {
+                    wk.SaveAs(fullName, format, password);
+                }
+
             }
             else
             {
-                wk.SaveAs(fullName, format, password);
+                wk.Save();
+            }
+            if (newWk)
+            {
+                sb.AppendLine("Successfully saved to a new file.");
+            }
+            else
+            {
+                sb.AppendLine("Successfully saved to an existing file.");
+            }
+            if (newSh)
+            {
+                sb.AppendLine("Successfully created a new sheet.");
             }
             wk.Close();
         }
 
-        return "ok";
+        return sb.ToString();
     }
 }
