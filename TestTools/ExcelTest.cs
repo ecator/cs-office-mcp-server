@@ -55,6 +55,73 @@ public class ExcelTest: TestBase
     }
 
     [TestMethod]
+    [DataRow("write-clear-0.xlsm", "Sheet1", "C", 1, "B", 1, null)]
+    [DataRow("write-clear-0.xlsm", "Sheet2", null, null, null, null, null)]
+    public void TestClear(string fileName, string sheetName, string startColumn, int? startRow, string endColumn, int? endRow, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var response = "";
+        var data = new string[][]
+        {
+            new []{"1","ÄãºÃ",DateTime.Now.ToString() },
+            new []{"2","¤³¤ó¤Ë¤Á¤Ï", DateTime.Now.ToString() },
+            new []{"3","ÌìšÝ¤¬¤¤¤¤¤«¤é\nÉ¢ši¤·¤·¤Þ¤·¤ç¤¦¡£", DateTime.Now.ToString() }
+        };
+        ExcelTools.Write(fullName, sheetName, data, "A", 1, password);
+        response = ExcelTools.Clear(fullName, sheetName, startColumn, startRow, endColumn, endRow, password);
+        if (string.IsNullOrEmpty(startColumn))
+        {
+            Assert.AreEqual("All cells cleared.", response);
+        }
+        else
+        {
+            Assert.AreEqual("$B$1:$C$1 cleared.", response);
+        }
+    }
+    [TestMethod]
+    [DataRow("write-rename-0.xlsm", "Sheet1", "Sheet1R", null)]
+    public void TestRenameSheet(string fileName, string oldSheetName, string newSheetName, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var response = "";
+        ExcelTools.Write(fullName, oldSheetName, null, "A", 1, password, true);
+        response = ExcelTools.RenameSheet(fullName, oldSheetName, newSheetName, password);
+        Assert.AreEqual($"{oldSheetName} has been changed to {newSheetName}.", response);
+    }
+    [TestMethod]
+    [DataRow("write-delete-0.xlsm", "Sheet1", null)]
+    public void TestDeleteSheet(string fileName, string sheetName, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var response = "";
+        ExcelTools.Write(fullName, sheetName, null, "A", 1, password, true);
+        ExcelTools.Write(fullName, sheetName + "1", null, "A", 1, password, false);
+        response = ExcelTools.DeleteSheet(fullName, sheetName, password);
+        Assert.AreEqual($"{sheetName} has been deleted.", response);
+    }
+
+    [TestMethod]
+    [DataRow("wk0-macro.xlsm", "test1", null, false, null)]
+    [DataRow("wk0-macro.xlsm", "test2", new string[] { "1" }, false, null)]
+    [DataRow("wk0-macro.xlsm", "test3", new string[] { "1", "2" }, false, null)]
+    [DataRow("wk0-macro.xlsm", "test4", new string[] { "1", "2", "3", "4", "5", "6", "7", "AAAA" }, false, null)]
+    public void TestRunMacro(string fileName, string macroName, string[]? macroParameters, bool save, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var response = "";
+        response = ExcelTools.RunMacro(fullName, macroName, macroParameters, save, password);
+        if (macroParameters == null || macroParameters.Length == 0 || macroName == "test2")
+        {
+            Assert.AreEqual($"{macroName} has been called.", response);
+        }
+        else
+        {
+            Assert.AreEqual($"The result of {macroName}: {string.Join("", macroParameters)}", response);
+        }
+
+    }
+
+    [TestMethod]
     [DataRow("wk1.xlsm", "Sheet1", null)]
     public void TestReadUsedRange(string fileName, string sheetName, string password)
     {
