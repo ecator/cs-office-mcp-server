@@ -33,6 +33,87 @@ public static class ExcelTools
         return sheets;
     }
 
+    [McpServerTool(Name = "excel_get_tables"), Description("Get all the table names of the specified Excel file.")]
+    public static List<string> GetTables([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
+    {
+        List<string> tables = new List<string>();
+        using (var session = new ExcelSession())
+        {
+            var wk = session.OpenWorkbook(fullName, true, password);
+
+            foreach (Excel.ListObject table in session.GetTables(wk))
+            {
+                tables.Add(table.Name);
+            }
+        }
+
+        return tables;
+    }
+
+    [McpServerTool(Name = "excel_get_table_content"), Description("Get the content of a table of the specified Excel file.")]
+    public static string GetTableContent([Description("The full path of the Excel file.")] string fullName
+        , [Description("The table name of the Excel file.")] string tableName
+        , [Description("The password of the Excel file, if there is one.")] string? password = null)
+    {
+        Excel.ListObject table = null;
+        Excel.Range range;
+        Excel.Range cells;
+        StringBuilder data = new StringBuilder();
+        string address;
+        string sheetName;
+        using (var session = new ExcelSession())
+        {
+            var wk = session.OpenWorkbook(fullName, true, password);
+
+            foreach (Excel.ListObject t in session.GetTables(wk))
+            {
+                if(t.Name == tableName)
+                {
+                    table = t;
+                    break;
+                }
+            }
+            if(table == null)
+            {
+                throw new McpException($"The table {tableName} does not exist in the Excel file {fullName}.");
+            }
+            range = table.Range;
+            session.RegisterComObject(range);
+            var rows = range.Rows;
+            session.RegisterComObject(rows);
+            var cols = range.Columns;
+            session.RegisterComObject(cols);
+            cells = range.Cells;
+            session.RegisterComObject(cells);
+            Excel.Worksheet sh = table.Parent as Excel.Worksheet;
+            session.RegisterComObject(sh);
+            sheetName = sh.Name;
+            address = range.Address[false,false];
+            data.AppendLine($"Table {tableName} is in sheet {sheetName}, address {address}, total {rows.Count - 1} data rows and {cols.Count} columns.");
+            for (int i = 1; i <= rows.Count; i++)
+            {
+                var lines = new string[cols.Count];
+                if (i == 2)
+                {
+                    Array.Fill(lines, "---");
+                    data.AppendLine(string.Join("|", lines));
+                }
+                for (int j = 1; j <= cols.Count; j++)
+                {
+                    Excel.Range cell = cells[i, j];
+                    session.RegisterComObject(cell);
+                    string s = Convert.ToString(cell.Value) ?? "";
+                    s = s.Replace("\r\n", "\\n").Replace("\n","\\n").Replace("|","\\|");
+                    lines[j - 1] = s;
+                }
+                data.AppendLine(string.Join("|", lines));
+            }
+
+        }
+
+        return data.ToString();
+    }
+
     [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet.")]
     public static Dictionary<string, object> Read([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName

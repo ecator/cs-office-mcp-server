@@ -184,6 +184,30 @@ public class ExcelSession : Session<Excel.Application>
     }
 
     /// <summary>
+    /// Get table list.
+    /// </summary>
+    /// <param name="wk">Workbook</param>
+    /// <returns></returns>
+    /// <exception cref="McpException"></exception>
+    public List<Excel.ListObject> GetTables(Excel.Workbook wk)
+    {
+        List<Excel.ListObject> tables = new List<Excel.ListObject>();
+        var shs = GetSheets(wk);
+        foreach (Excel.Worksheet sh in shs)
+        {
+            var listObjects = sh.ListObjects;
+            RegisterComObject(listObjects);
+            foreach(Excel.ListObject table in listObjects)
+            {
+                RegisterComObject(table);
+                tables.Add(table);
+            }
+        }
+
+        return tables;
+    }
+
+    /// <summary>
     /// Get worksheet by name.
     /// </summary>
     /// <param name="wk">Workbook</param>

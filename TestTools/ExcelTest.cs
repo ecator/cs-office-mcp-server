@@ -21,6 +21,22 @@ public class ExcelTest: TestBase
     }
 
     [TestMethod]
+    [DataRow("wk1.xlsm", null)]
+    public void TestGetTables(string fileName, string password)
+    {
+
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var tables = ExcelTools.GetTables(fullName, password);
+        foreach (var table in tables)
+        {
+            var response = ExcelTools.GetTableContent(fullName, table, password);
+            TestContext.WriteLine(response);
+        }
+
+
+    }
+
+    [TestMethod]
     [DataRow("")]
     [DataRow("test.txt")]
     public void TestFileNameCheck(string name)
