@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Excel;
+using ModelContextProtocol;
+using ModelContextProtocol.Server;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using ModelContextProtocol.Server;
-using Excel = Microsoft.Office.Interop.Excel;
-using System.ComponentModel;
-using ModelContextProtocol;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace OfficeServer.Tools;
 
@@ -17,37 +18,43 @@ public static class ExcelTools
 {
 
     [McpServerTool(Name = "excel_get_sheets"), Description("Get all the sheet names of the specified Excel file.")]
-    public static List<string> GetSheets([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
+    public static string GetSheets([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
     {
-        List<string> sheets = new List<string>();
+        var data = new StringBuilder();
+        var count = 0;
+        data.AppendLine();
         using (var session = new ExcelSession())
         {
             var wk = session.OpenWorkbook(fullName, true, password);
-            
+
             foreach (Excel.Worksheet sheet in session.GetSheets(wk))
             {
-                sheets.Add(sheet.Name);
+                count++;
+                data.AppendLine($"{count}. {sheet.Name}");
             }
         }
-
-        return sheets;
+        data.Insert(0, $"Total `{count}` sheets in the Excel file `{fullName}`:");
+        return data.ToString();
     }
 
     [McpServerTool(Name = "excel_get_tables"), Description("Get all the table names of the specified Excel file.")]
-    public static List<string> GetTables([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
+    public static string GetTables([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
     {
-        List<string> tables = new List<string>();
+        var data = new StringBuilder();
+        var count = 0;
+        data.AppendLine();
         using (var session = new ExcelSession())
         {
             var wk = session.OpenWorkbook(fullName, true, password);
 
             foreach (Excel.ListObject table in session.GetTables(wk))
             {
-                tables.Add(table.Name);
+                count++;
+                data.AppendLine($"{count}. {table.Name}");
             }
         }
-
-        return tables;
+        data.Insert(0, $"Total `{count}` tables in the Excel file `{fullName}`:");
+        return data.ToString();
     }
 
     [McpServerTool(Name = "excel_get_table_content"), Description("Get the content of a table of the specified Excel file.")]
@@ -103,7 +110,7 @@ public static class ExcelTools
                     Excel.Range cell = cells[i, j];
                     session.RegisterComObject(cell);
                     string s = Convert.ToString(cell.Value) ?? "";
-                    s = s.Replace("\r\n", "\\n").Replace("\n","\\n").Replace("|","\\|");
+                    s = session.EscapeMarkdownTableValue(s);
                     lines[j - 1] = s;
                 }
                 data.AppendLine(string.Join("|", lines));
@@ -161,6 +168,81 @@ public static class ExcelTools
 
         return values;
     }
+
+    [McpServerTool(Name = "excel_find"), Description("Find value from Excel files.")]
+    public static string Find([Description("The list of full path of Excel files that need to be searched for.")] string[] fullNameList
+    , [Description("The value to be searched for which can use wildcard characters like ?(any single character), *(any number of characters), ~followed by ?, *, or ~(a question mark, asterisk, or tilde).")] string searchValue
+    , [Description("Match against any part of the search text when true. Match against the whole of the search text when false.")] bool matchPart = true
+    , [Description("Ignoring lower case and upper case differences when tru. Case insensitive when false.")] bool ignoreCase = true
+    , [Description("The password of the Excel files, if there is one and all are the same.")] string? password = null)
+    {
+        var data = new StringBuilder();
+        var foundData = new StringBuilder();
+        var line = new string[3];
+        var totalCount = 0;
+        var count = 0;
+        var lookAt = Excel.XlLookAt.xlPart;
+        if(!matchPart)
+        {
+            lookAt = Excel.XlLookAt.xlWhole;
+        }
+        if (fullNameList == null || fullNameList.Length == 0)
+        {
+            throw new McpException("The full path list of the Excel file cannot be empty or null.");
+        }
+        data.AppendLine();
+        data.AppendLine();
+        using (var session = new ExcelSession())
+        {
+            foreach (var fullName in fullNameList)
+            {
+                var wk = session.OpenWorkbook(fullName, true, password);
+                var shs = session.GetSheets(wk);
+                count = 0;
+                foundData.Clear();
+                foundData.AppendLine();
+                foreach (Excel.Worksheet sh in shs)
+                {
+                    var cells = sh.Cells;
+                    session.RegisterComObject(cells);
+                    var found = cells.Find(searchValue, Type.Missing, Excel.XlFindLookIn.xlValues, lookAt, Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlNext, !ignoreCase, Type.Missing, Type.Missing);
+                    if (found != null)
+                    {
+                        session.RegisterComObject(found);
+                        var firstAddress = found.Address;
+                        if(count == 0)
+                        {
+                            foundData.AppendLine($"Sheet|Address|Value");
+                            foundData.AppendLine($"---|---|---");
+                        }
+                        do
+                        {
+                            totalCount++;
+                            count++;
+                            line[0] = sh.Name;
+                            line[1] = found.Address[false, false];
+                            line[2] = session.EscapeMarkdownTableValue(Convert.ToString(found.Value));
+                            foundData.AppendLine(string.Join("|", line));
+                            found = cells.FindNext(found);
+                            if (found != null)
+                            {
+                                session.RegisterComObject(found);
+                            }
+                        } while (found != null && found.Address != firstAddress);
+                    }
+                }
+                if(count > 0)
+                {
+                    foundData.Insert(0, $"`{count}` results in `{fullName}`:");
+                    data.AppendLine(foundData.ToString());
+                }
+            }
+
+        }
+        data.Insert(0, $"Found a total of `{totalCount}` results for `{searchValue}` in all files.");
+        return data.ToString();
+    }
+
     [McpServerTool(Name = "excel_clear"), Description("Clear the value of a cell or a range of cells from the specified worksheet.\nClear the entire sheet if startColumn or startRow is null.")]
     public static string Clear([Description("The full path of the Excel file.")] string fullName
     , [Description("The sheet name of the Excel file.")] string sheetName

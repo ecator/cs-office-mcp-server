@@ -15,25 +15,36 @@ public class ExcelTest: TestBase
     {
 
         var fullName = Path.Combine(TestDataDirectory, fileName);
-        var sheets = ExcelTools.GetSheets(fullName, password);
-        TestContext.WriteLine(string.Join(",", sheets));
-
+        var response = ExcelTools.GetSheets(fullName, password);
+        TestContext.WriteLine(response);
     }
 
     [TestMethod]
     [DataRow("wk1.xlsm", null)]
+    [DataRow("wk0.xls", null)]
     public void TestGetTables(string fileName, string password)
     {
 
         var fullName = Path.Combine(TestDataDirectory, fileName);
-        var tables = ExcelTools.GetTables(fullName, password);
-        foreach (var table in tables)
-        {
-            var response = ExcelTools.GetTableContent(fullName, table, password);
-            TestContext.WriteLine(response);
-        }
+        var response = ExcelTools.GetTables(fullName, password);
+        TestContext.WriteLine(response);
+
+    }
 
 
+    [TestMethod]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "ÄãºÃ", true,true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "?ºÃ", false, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "*ºÃ", false, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "~?", true, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "tolist", true, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "tolist", true, false, null)]
+    public void TestFind(string[] fileNameList,string searchValue, bool matchPart,bool ignoreCase, string password)
+    {
+
+        var fullNames = fileNameList.Select(p => Path.Combine(TestDataDirectory, p)).ToArray() ;
+        var response = ExcelTools.Find(fullNames, searchValue, matchPart, ignoreCase, password);
+        TestContext.WriteLine(response);
     }
 
     [TestMethod]

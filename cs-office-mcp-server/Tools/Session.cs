@@ -60,6 +60,24 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
     }
 
     /// <summary>
+    /// Escape the value of the markdown table
+    /// </summary>
+    /// <param name="val">Value that requires escaping.</param>
+    /// <returns></returns>
+    public string EscapeMarkdownTableValue(string val)
+    {
+        if (string.IsNullOrEmpty(val))
+        {
+            return val;
+        }
+        val = val.Replace("\n", "<br>");
+        val = val.Replace("\r", "");
+        val = val.Replace("\\", "\\\\");
+        val = val.Replace("|", "\\|");
+        return val;
+    }
+
+    /// <summary>
     /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
     /// </summary>
     public void Dispose()
