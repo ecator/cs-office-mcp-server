@@ -4,7 +4,7 @@
 
 The MCP Server for operating Office files such as Excel,Word,PowerPoint,Outlook.
 
-**!!!Currently only supports Excel on Windows.**
+**!!!Currently only supports Excel and Word on Windows.**
 
 You must install Office 2016 and later versions to use this MCP server.
 
@@ -26,7 +26,7 @@ Then add the following configuration to the MCP servers configuration.
 }
 ```
 
-Note that this is only supported on Windows that has Office 2016 and above installed in 64-bit version!
+Note that this is only supported on Windows with Office 2016 (64-bit version) or above installed!
 
 # Tools
 ## Excel
