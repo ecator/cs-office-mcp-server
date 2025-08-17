@@ -173,7 +173,7 @@ public static class ExcelTools
     public static string Find([Description("The list of full path of Excel files that need to be searched for.")] string[] fullNameList
     , [Description("The value to be searched for which can use wildcard characters like ?(any single character), *(any number of characters), ~followed by ?, *, or ~(a question mark, asterisk, or tilde).")] string searchValue
     , [Description("Match against any part of the search text when true. Match against the whole of the search text when false.")] bool matchPart = true
-    , [Description("Ignoring lower case and upper case differences when tru. Case insensitive when false.")] bool ignoreCase = true
+    , [Description("Ignoring lower case and upper case differences when true. Case insensitive when false.")] bool ignoreCase = true
     , [Description("The password of the Excel files, if there is one and all are the same.")] string? password = null)
     {
         var data = new StringBuilder();

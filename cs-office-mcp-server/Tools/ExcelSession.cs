@@ -129,7 +129,7 @@ public class ExcelSession : Session<Excel.Application>
         }
         catch (Exception ex)
         {
-            throw new McpException($"Failed to open Excel workbook: {ex.Message}", ex);
+            throw new McpException($"Failed to add Excel workbook: {ex.Message}", ex);
         }
         RegisterComObject(wk);
         return wk;

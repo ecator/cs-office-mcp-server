@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
+using Word = Microsoft.Office.Interop.Word;
+
 
 namespace OfficeServer.Tools;
 
@@ -113,12 +115,19 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
             {
                 // Before quitting, set DisplayAlerts to false to avoid "Save changes?" prompts
                 dynamic dynamicApp = Application;
-                dynamicApp.DisplayAlerts = false;
+                if (dynamicApp is Excel.Application)
+                {
+                    dynamicApp.DisplayAlerts = false;
+                }
+                else if (dynamicApp is Word.Application)
+                {
+                    dynamicApp.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
+                }
                 dynamicApp.Quit();
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Warning: Failed to quit Excel application: {ex.Message}");
+                Console.Error.WriteLine($"Warning: Failed to quit COM Application: {ex.Message}");
             }
             finally
             {
