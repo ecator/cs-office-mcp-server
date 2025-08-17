@@ -31,7 +31,7 @@ Note that this is only supported on Windows that has Office 2016 and above insta
 # Tools
 ## Excel
 
-### excel_run_macro
+### `excel_run_macro`
 Run a macro of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
@@ -40,20 +40,20 @@ Run a macro of the specified Excel file.
 - `save`: Save the file after executing the macro.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_read_used_range
+### `excel_read_used_range`
 Read the value of used range of cells from the specified worksheet.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `sheetName*`: The sheet name of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_get_sheets
+### `excel_get_sheets`
 Get all the sheet names of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_write
+### `excel_write`
 Write data into a cell or a range of cells of the specified worksheet to an Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file. It will be created if not exist.
@@ -65,7 +65,7 @@ Write data into a cell or a range of cells of the specified worksheet to an Exce
 - `forceOverwriteFile`: Force overwrite to create a new one when the file exists.
 - `forceOverwriteSheet`: Force overwrite to create a new one when the sheet exists.
 
-### excel_rename_sheet
+### `excel_rename_sheet`
 Change the name of the sheet of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
@@ -73,27 +73,27 @@ Change the name of the sheet of the specified Excel file.
 - `newSheetName*`: The new sheet name of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_get_tables
+### `excel_get_tables`
 Get all the table names of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_delete_sheet
+### `excel_delete_sheet`
 Delete the sheet of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `sheetName*`: The sheet name of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_get_table_content
+### `excel_get_table_content`
 Get the content of a table of the specified Excel file.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `tableName*`: The table name of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
-### excel_find
+### `excel_find`
 Find value from Excel files.
 #### parameters
 - `fullNameList*`: The list of full path of Excel files that need to be searched for.
@@ -102,7 +102,7 @@ Find value from Excel files.
 - `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false
 - `password`: The password of the Excel files, if there is one and all are the same.
 
-### excel_read
+### `excel_read`
 Read the value of a cell or a range of cells from the specified worksheet.
 #### parameters
 - `fullName*`: The full path of the Excel file.
@@ -113,7 +113,7 @@ Read the value of a cell or a range of cells from the specified worksheet.
 - `endRow`: The last row number. If empty, then use xlDown relative to startRow
 - `password`: The password of the Excel file, if there is one.
 
-### excel_clear
+### `excel_clear`
 Clear the value of a cell or a range of cells from the specified worksheet.
 Clear the entire sheet if startColumn or startRow is null.
 #### parameters
@@ -128,7 +128,64 @@ Clear the entire sheet if startColumn or startRow is null.
 
 ## Word
 
-Coming soon...
+### `word_run_macro`
+Run a macro of the specified Word file.
+#### parameters
+- `fullName*`: The full path of the Word file.
+- `macroName*`: The name of macro.
+- `macroParameters`: The parameters of macro. The maximum number is 30.
+- `save`: Save the file after executing the macro.
+- `password`: The password of the Word file, if there is one.
+
+### `word_clear`
+Clear the whole content of the specified Word file.
+#### parameters
+- `fullName*`: The full path of the Word file.
+- `password`: The password of the Word file, if there is one.
+
+### `word_read`
+Get the text content of the specified Word file.
+#### parameters
+- `fullName*`: The full path of the Word file.
+- `fromPage`: The starting page number to read.
+- `toPage`: The end page number to read. If it's empty, then read up to the last page.
+- `password`: The password of the Word file, if there is one.
+
+### `word_write`
+Write data into an Word file.
+#### parameters
+- `fullName*`: The full path of the Word file. It will be created if not exist.
+- `data`: The data that needs to be written in.
+- `insertAfter`: Append to the end of the document when true. Append to the beginning of the document when false.
+- `insertNewline`: Append a newline when writing to an existing file and the newline option is true. When data is appended to the end of the document, a newline character is added before the data. When data is prepended to the beginning of the document, a newline character is added after the data.
+- `password`: The password of the Word file, if there is one.
+- `forceOverwriteFile`: Force overwrite to create a new one when the file exists.
+
+### `word_find`
+Find value from Word files.
+#### parameters
+- `fullNameList*`: The list of full path of Word files that need to be searched for.
+- `searchValue*`: The value to be searched for which can use wildcard characters like ?(any single character), *(any number of characters), \ followed by ?, *, or \(a question mark, asterisk, or backslash).
+- `matchPart`: Match against any part of part of a larger word when true. Match against the entire words of the search text when false.
+- `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false.
+- `password`: The password of the Word files, if there is one and all are the same.
+
+### `word_get_page_count`
+Get all the number of the pages of the specified Word file.
+#### parameters
+- `fullName*`: The full path of the Word file.
+- `password`: The password of the Word file, if there is one.
+
+### `word_replace`
+Replace value from Word files.
+#### parameters
+- `fullNameList*`: The list of full path of Word files that need to be searched for.
+- `oldValue*`: The value to be searched for which can use wildcard characters like ?(any single character), *(any number of characters), \ followed by ?, *, or \(a question mark, asterisk, or backslash).
+- `newValue*`: The new replacement value.
+- `matchPart`: Match against any part of part of a larger word when true. Match against the entire words of the search text when false.
+- `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false.
+- `replaceAll`: Replace all matching items when true. Replace only the first matching item when false.
+- `password`: The password of the Word files, if there is one and all are the same.
 
 ## PowerPoint
 
