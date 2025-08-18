@@ -1,5 +1,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Workflow Status](https://github.com/ecator/cs-office-mcp-server/actions/workflows/build.yml/badge.svg)](https://github.com/ecator/cs-office-mcp-server/releases)
+
+[🇨🇳中文](https://www.readme-i18n.com/zh/ecator/cs-office-mcp-server)
+[🇯🇵日本語](https://www.readme-i18n.com/ja/ecator/cs-office-mcp-server)
+[🇰🇷한국어](https://www.readme-i18n.com/ko/ecator/cs-office-mcp-server)
+[🇩🇪Deutsch](https://www.readme-i18n.com/de/ecator/cs-office-mcp-server) 
+[🇪🇸Español](https://www.readme-i18n.com/es/ecator/cs-office-mcp-server)
+[🇫🇷français](https://www.readme-i18n.com/fr/ecator/cs-office-mcp-server)
+[🇵🇹Português](https://www.readme-i18n.com/pt/ecator/cs-office-mcp-server)
+[🇷🇺Русский](https://www.readme-i18n.com/ru/ecator/cs-office-mcp-server)
+
 # Overview
 
 The MCP Server for operating Office files such as Excel,Word,PowerPoint,Outlook.
