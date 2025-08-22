@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace OfficeServer.Tools;
 
 /// <summary>
-/// Manages an Wor Application instance and its associated COM objects, ensuring proper release.
+/// Manages an Word Application instance and its associated COM objects, ensuring proper release.
 /// Implements IDisposable for use with 'using' statements.
 /// </summary>
 public class WordSession : Session<Word.Application>
