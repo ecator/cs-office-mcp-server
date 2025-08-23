@@ -99,7 +99,7 @@ public class WordSession : Session<Word.Application>
         }
         catch (Exception ex)
         {
-            throw new McpException($"Failed to open Word workbook: {ex.Message}", ex);
+            throw new McpException($"Failed to open Word document: {ex.Message}", ex);
         }
         RegisterComObject(doc);
         return doc;
