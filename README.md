@@ -12,9 +12,9 @@
 
 # Overview
 
-The MCP Server for operating Office files such as Excel,Word,PowerPoint,Outlook.
+The MCP Server for operating Office files such as Excel, Word, PowerPoint and Outlook.
 
-**!!!Currently only supports Excel and Word on Windows.**
+**!!!Currently only supports Excel, Word and PowerPoint on Windows.**
 
 You must install Office 2016 and later versions to use this MCP server.
 
