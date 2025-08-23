@@ -199,7 +199,38 @@ Replace value from Word files.
 
 ## PowerPoint
 
-Coming soon...
+### `powerpoint_run_macro`
+Run a macro of the specified PowerPoint file.
+#### parameters
+- `fullName*`: The full path of the PowerPoint file.
+- `macroName*`: The name of macro.
+- `macroParameters`: The parameters of macro. The maximum number is 30.
+- `save`: Save the file after executing the macro.
+- `password`: The password of the PowerPoint file, if there is one.
+
+### `powerpoint_read`
+Get the text content of the specified PowerPoint file.
+#### parameters
+- `fullName*`: The full path of the PowerPoint file.
+- `fromSlide`: The starting slide number to read.
+- `toSlide`: The end slide number to read. If it's empty, then read up to the last slide.
+- `password`: The password of the PowerPoint file, if there is one.
+
+### `powerpoint_find`
+Find value from PowerPoint files.
+#### parameters
+- `fullNameList*`: The list of full path of PowerPoint files that need to be searched for.
+- `searchValue*`: The value to be searched for.
+- `matchPart`: Match against any part of part of a larger word when true. Match against the entire words of the search text when false.
+- `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false.
+- `password`: The password of the PowerPoint files, if there is one and all are the same.
+
+### `powerpoint_get_slide_count`
+Get all the number of the slides of the specified PowerPoint file.
+#### parameters
+- `fullName*`: The full path of the PowerPoint file.
+- `password`: The password of the PowerPoint file, if there is one.
+
 
 ## Outlook
 
