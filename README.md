@@ -14,8 +14,6 @@
 
 The MCP Server for operating Office files such as Excel, Word, PowerPoint and Outlook.
 
-**!!!Currently only supports Excel, Word and PowerPoint on Windows.**
-
 You must install Office 2016 and later versions to use this MCP server.
 
 # Use
@@ -234,4 +232,47 @@ Get all the number of the slides of the specified PowerPoint file.
 
 ## Outlook
 
-Coming soon...
+### `outlook_read_appointments`
+Read the contents of the appointments in the calendar of Outlook.
+#### parameters
+- `withinDays`: The range of days for appointments. Read past appointments if a negative number used.
+
+### `outlook_send_appointment`
+Send a appointment using Outlook.
+#### parameters
+- `subject*`: The subject of the appointment.
+- `participants*`: An array of email addresses representing the participants of the meeting.
+- `startTime*`: The start time of the appointment.
+- `duration*`: The duration of the appointment in minutes. Must be greater than 0.
+- `location`: The location of the appointment.
+- `body`: The body content of the appointment.
+- `displayBeforeSend`: Display the appointment before sending, and send it after manual confirmation, otherwise send it directly.
+
+### `outlook_get_inbox_mail_count`
+Get all the number of mail items in the inbox of Outlook.
+#### parameters
+(No parameters)
+
+### `outlook_read_inbox_mails`
+Read the contents of the mails in the inbox of Outlook.
+#### parameters
+- `startItem`: The starting position of the item to be read, which starts from 1.
+- `maxItems`: Maximum number of mails to be read.
+
+### `outlook_send_mail`
+Send a mail using Outlook.
+#### parameters
+- `subject*`: The subject of the mail.
+- `sendTo*`: The primary recipient(s) of the mail.
+- `body*`: The content of the mail body. Can be plain text or HTML, depending on the useHtml.
+- `useHtml`: A boolean value indicating whether the mail body should be formatted as HTML.
+- `sendCc`: The CC recipient(s) of the mail.
+- `sendBcc`: The BCC recipient(s) of the mail.
+- `displayBeforeSend`: Display the mail before sending, and send it after manual confirmation, otherwise send it directly.
+
+### `outlook_find_inbox_mails`
+Find the contents of the mails in the inbox of Outlook.
+#### parameters
+- `searchValue`: The value to be searched for will be searched in the subject and body. No filtering if empty.
+- `senders`: Email or name of senders need to be specified. No filtering if empty.
+- `maxItems`: Maximum number of mails to return.

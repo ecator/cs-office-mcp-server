@@ -1,5 +1,3 @@
-﻿using Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Interop.Word;
 using ModelContextProtocol;
 using System;
 using System.Collections.Generic;
@@ -11,6 +9,8 @@ using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Word = Microsoft.Office.Interop.Word;
+using Outlook = Microsoft.Office.Interop.Outlook;
+
 
 
 
@@ -33,14 +33,12 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
     /// </summary>
     /// <typeparam name="T">The type of the COM object.</typeparam>
     /// <param name="obj">The COM object instance.</param>
-    /// <returns>The registered COM object.</returns>
-    public T RegisterComObject<T>(T obj) where T : class
+    public void RegisterComObject<T>(T obj) where T : class
     {
         if (obj != null && Marshal.IsComObject(obj))
         {
             _comObjectsToRelease.Add(obj);
         }
-        return obj;
     }
 
     /// <summary>
@@ -253,16 +251,44 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
                 if (dynamicApp is Excel.Application)
                 {
                     dynamicApp.DisplayAlerts = false;
+                    var wks = dynamicApp.Workbooks as Excel.Workbooks;
+                    RegisterComObject(wks);
+                    for (var i = 1; i <= wks.Count; i++)
+                    {
+                        var wk = wks[i];
+                        RegisterComObject(wk);
+                        wk.Close(false);
+                    }
                 }
                 else if (dynamicApp is Word.Application)
                 {
                     dynamicApp.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
+                    var docs = dynamicApp.Documents as Word.Documents;
+                    RegisterComObject(docs);
+                    for (var i = 1; i <= docs.Count; i++)
+                    {
+                        var doc = docs[i];
+                        RegisterComObject(doc);
+                        doc.Close(false);
+                    }
+
                 }
                 else if (dynamicApp is PowerPoint.Application)
                 {
                     dynamicApp.DisplayAlerts = PowerPoint.PpAlertLevel.ppAlertsNone;
+                    var prs = dynamicApp.Presentations as PowerPoint.Presentations;
+                    RegisterComObject(prs);
+                    for (var i = 1; i <= prs.Count; i++)
+                    {
+                        var pr = prs[i];
+                        RegisterComObject(pr);
+                        pr.Close();
+                    }
                 }
-                dynamicApp.Quit();
+                if (!(dynamicApp is Outlook.Application))
+                {
+                    dynamicApp.Quit();
+                }
             }
             catch (Exception ex)
             {
