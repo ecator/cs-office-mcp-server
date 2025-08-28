@@ -26,9 +26,9 @@ public class WordTest : TestBase
 
 
     [TestMethod]
-    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "����԰", true, true, null)]
-    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "����??��Ӫ", false, true, null)]
-    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "����*", false, true, null)]
+    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "动物园", true, true, null)]
+    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "动物??运营", false, true, null)]
+    [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "动物*", false, true, null)]
     [DataRow(new string[] { "doc1.doc", "doc1.docx" }, @"\?", true, true, null)]
     [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "tolist", true, true, null)]
     [DataRow(new string[] { "doc1.doc", "doc1.docx" }, "tolist", true, false, null)]
@@ -109,8 +109,8 @@ public class WordTest : TestBase
     [TestMethod]
     [DataRow("write-0.doc", "test1", true, false, null, true)]
     [DataRow("write-0-pass-223.docx", "test2", true, true, "223", false)]
-    [DataRow("write-0.docm", "����2222", false, true, null, false)]
-    [DataRow("write-0.rtf", "����1\n����1\naaaaaaa", false, false, null, true)]
+    [DataRow("write-0.docm", "测试2222", false, true, null, false)]
+    [DataRow("write-0.rtf", "换行1\n换行1\naaaaaaa", false, false, null, true)]
     public void TestWrite(string fileName, string data, bool insertAfter, bool insertNewline, string password, bool forceOverwriteFile)
     {
         const string RESULT_NEW_FILE = "Successfully saved to a new file.";
@@ -166,17 +166,17 @@ public class WordTest : TestBase
     }
 
     [TestMethod]
-    [DataRow(new string[] { "write-1.docx" }, "����԰", "ֲ��԰", true, true, true, null)]
-    [DataRow(new string[] { "write-2.docx" }, "����??��Ӫ", "ίԱ��", false, true, false, null)]
-    [DataRow(new string[] { "write-3.docx" }, "����*","�����" ,false, true, false, null)]
-    [DataRow(new string[] { "write-4.docx" }, @"\?", "�ʺ�", true, true, true, null)]
+    [DataRow(new string[] { "write-1.docx" }, "动物园", "植物园", true, true, true, null)]
+    [DataRow(new string[] { "write-2.docx" }, "动物??运营", "委员会", false, true, false, null)]
+    [DataRow(new string[] { "write-3.docx" }, "动物*","海洋馆" ,false, true, false, null)]
+    [DataRow(new string[] { "write-4.docx" }, @"\?", "问号", true, true, true, null)]
     [DataRow(new string[] { "write-5.docx" }, "tolist", "TOLIST", true, true, true, null)]
     [DataRow(new string[] { "write-6.docx" }, "tolist", "TOLIST", true, false, true, null)]
     public void TestReplace(string[] fileNameList, string oldValue, string newValue, bool matchPart, bool ignoreCase, bool replaceAll, string password)
     {
 
         var fullNames = fileNameList.Select(p => Path.Combine(TestDataDirectory, p)).ToArray();
-        var data = "����԰��һ���ܺõĵط�������԰�кܶද�����԰����Ӫ�ܺã����Ƕ���԰����Ӫ������ġ�ToList�������Եõ�һ���б���?";
+        var data = "动物园是一个很好的地方。动物园有很多动物。动物园的运营很好，但是动物园的运营是外包的。ToList方法可以得到一个列表。?";
         foreach (var fullName in fullNames)
         {
             if (File.Exists(fullName))

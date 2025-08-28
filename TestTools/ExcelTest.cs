@@ -33,9 +33,9 @@ public class ExcelTest: TestBase
 
 
     [TestMethod]
-    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "ƒ„∫√", true,true, null)]
-    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "?∫√", false, true, null)]
-    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "*∫√", false, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "‰Ω†Â•Ω", true,true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "?Â•Ω", false, true, null)]
+    [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "*Â•Ω", false, true, null)]
     [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "~?", true, true, null)]
     [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "tolist", true, true, null)]
     [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "tolist", true, false, null)]
@@ -90,9 +90,9 @@ public class ExcelTest: TestBase
         var response = "";
         var data = new string[][]
         {
-            new []{"1","ƒ„∫√",DateTime.Now.ToString() },
-            new []{"2","§≥§Û§À§¡§œ", DateTime.Now.ToString() },
-            new []{"3","ÃÏö›§¨§§§§§´§È\n…¢öi§∑§∑§ﬁ§∑§Á§¶°£", DateTime.Now.ToString() }
+            new []{"1","‰Ω†Â•Ω",DateTime.Now.ToString() },
+            new []{"2","„Åì„Çì„Å´„Å°„ÅØ", DateTime.Now.ToString() },
+            new []{"3","Â§©Ê∞ó„Åå„ÅÑ„ÅÑ„Åã„Çâ\nÊï£Ê≠©„Åó„Åó„Åæ„Åó„Çá„ÅÜ„ÄÇ", DateTime.Now.ToString() }
         };
         ExcelTools.Write(fullName, sheetName, data, "A", 1, password);
         response = ExcelTools.Clear(fullName, sheetName, startColumn, startRow, endColumn, endRow, password);
@@ -172,9 +172,9 @@ public class ExcelTest: TestBase
         var fullName = Path.Combine(TestDataDirectory, fileName);
         var data = new string[][]
         {
-            new []{"1","ƒ„∫√",DateTime.Now.ToString() },
-            new []{"2","§≥§Û§À§¡§œ", DateTime.Now.ToString() },
-            new []{"3","ÃÏö›§¨§§§§§´§È\n…¢öi§∑§∑§ﬁ§∑§Á§¶°£", DateTime.Now.ToString() }
+            new []{"1","‰Ω†Â•Ω",DateTime.Now.ToString() },
+            new []{"2","„Åì„Çì„Å´„Å°„ÅØ", DateTime.Now.ToString() },
+            new []{"3","Â§©Ê∞ó„Åå„ÅÑ„ÅÑ„Åã„Çâ\nÊï£Ê≠©„Åó„Åó„Åæ„Åó„Çá„ÅÜ„ÄÇ", DateTime.Now.ToString() }
         };
         if (File.Exists(fullName))
         {
