@@ -1,4 +1,4 @@
-﻿using ModelContextProtocol;
+using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using System;
 using System.Collections.Generic;
@@ -305,7 +305,72 @@ public static class ExcelTools
         response = $"{oldSheetName} has been changed to {newSheetName}.";
         return response;
     }
-    
+
+    [McpServerTool(Name = "excel_copy_sheet"), Description("Copy the sheet of the specified Excel file.")]
+    public static string CopySheet([Description("The full path of the Excel file.")] string fullName
+    , [Description("The source sheet name of the Excel file.")] string sourceSheetName
+    , [Description("The target sheet name of the Excel file.")] string targetSheetName
+    , [Description("If the target sheet exists, delete it first.")] bool deleteTargetIfExists = false
+    , [Description("Move target sheet to the left of source sheet after copying, otherwise the right of source sheet.")] bool beforeSourceSheet = true
+    , [Description("The password of the Excel file, if there is one.")] string password = null)
+    {
+        var response = "";
+        if (string.IsNullOrEmpty(sourceSheetName))
+        {
+            throw new McpException("The source sheet name cannot be empty or null.");
+        }
+        if (string.IsNullOrEmpty(targetSheetName))
+        {
+            throw new McpException("The target sheet name cannot be empty or null.");
+        }
+        if (sourceSheetName.Equals(targetSheetName))
+        {
+            throw new McpException("The source sheet name cannot be the same as target sheet name.");
+        }
+        using (var session = new ExcelSession())
+        {
+            var wk = session.OpenWorkbook(fullName, false, password);
+            var shList = session.GetSheets(wk);
+            foreach (Excel.Worksheet sh in shList)
+            {
+                if (sh.Name == targetSheetName)
+                {
+                    if (deleteTargetIfExists)
+                    {
+                        sh.Delete();
+                    }
+                    else
+                    {
+                        throw new McpException($"The target sheet `{targetSheetName}` already exists in the Excel file `{fullName}`.");
+                    }
+                    break;
+                }
+            }
+
+            var sourceSh = session.GetSheet(wk, sourceSheetName);
+            int targetShIdx;
+            if (beforeSourceSheet)
+            {
+                sourceSh.Copy(Before: sourceSh);
+                targetShIdx = sourceSh.Index - 1;
+            }
+            else
+            {
+                sourceSh.Copy(After: sourceSh);
+                targetShIdx = sourceSh.Index + 1;
+            }
+            Excel.Sheets shs = wk.Sheets;
+            session.RegisterComObject(shs);
+            Excel.Worksheet targetSh = shs[targetShIdx];
+            session.RegisterComObject(targetSh);
+            targetSh.Name = targetSheetName;
+            wk.Save();
+            wk.Close();
+        }
+        response = $"{sourceSheetName} has been copied to {targetSheetName}.";
+        return response;
+    }
+
     [McpServerTool(Name = "excel_delete_sheet"), Description("Delete the sheet of the specified Excel file.")]
     public static string DeleteSheet([Description("The full path of the Excel file.")] string fullName
     , [Description("The sheet name of the Excel file.")] string sheetName

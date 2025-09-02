@@ -10,7 +10,7 @@
     <Company>Martin Cat</Company>
     <Description>Windows MCP Server for operating Office files</Description>
     <Title>OfficeMcpServer</Title>
-    <Version>0.5.0</Version>
+    <Version>0.6.0</Version>
     <PackageProjectUrl>https://github.com/ecator/cs-office-mcp-server</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ecator/cs-office-mcp-server</RepositoryUrl>
     <Copyright>© 2025 Martin Cat. All Rights Reserved.</Copyright>

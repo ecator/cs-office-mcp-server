@@ -115,6 +115,41 @@ public class ExcelTest: TestBase
         response = ExcelTools.RenameSheet(fullName, oldSheetName, newSheetName, password);
         Assert.AreEqual($"{oldSheetName} has been changed to {newSheetName}.", response);
     }
+
+    [TestMethod]
+    [DataRow("write-copy-0.xlsm", "Sheet1", "Sheet1C", false, false, null)]
+    [DataRow("write-copy-1.xlsm", "Sheet111", "Sheet1CCC", true, true, null)]
+    public void TestCopySheet(string fileName, string sourceSheetName, string targetSheetName, bool deleteTargetIfExists, bool beforeSourceSheet, string password)
+    {
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        if (File.Exists(fullName))
+        {
+            File.Delete(fullName);
+        }
+        var response = "";
+        ExcelTools.Write(fullName, sourceSheetName, null, "A", 1, password, true);
+        response = ExcelTools.CopySheet(fullName, sourceSheetName, targetSheetName, deleteTargetIfExists, beforeSourceSheet, password);
+        Assert.AreEqual($"{sourceSheetName} has been copied to {targetSheetName}.", response);
+        if (deleteTargetIfExists)
+        {
+            response = ExcelTools.CopySheet(fullName, sourceSheetName, targetSheetName, deleteTargetIfExists, beforeSourceSheet, password);
+            Assert.AreEqual($"{sourceSheetName} has been copied to {targetSheetName}.", response);
+        }
+        else
+        {
+            var errorMessage = "";
+            try
+            {
+                ExcelTools.CopySheet(fullName, sourceSheetName, targetSheetName, deleteTargetIfExists, beforeSourceSheet, password);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+            Assert.AreEqual($"The target sheet `{targetSheetName}` already exists in the Excel file `{fullName}`.", errorMessage);
+        }
+    }
+
     [TestMethod]
     [DataRow("write-delete-0.xlsm", "Sheet1", null)]
     public void TestDeleteSheet(string fileName, string sheetName, string password)

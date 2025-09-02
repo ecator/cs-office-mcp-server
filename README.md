@@ -81,6 +81,16 @@ Change the name of the sheet of the specified Excel file.
 - `newSheetName*`: The new sheet name of the Excel file.
 - `password`: The password of the Excel file, if there is one.
 
+### `excel_copy_sheet`
+Copy the sheet of the specified Excel file.
+#### parameters
+- `fullName*`: The full path of the Excel file.
+- `sourceSheetName*`: The source sheet name of the Excel file.
+- `targetSheetName*`: The target sheet name of the Excel file.
+- `deleteTargetIfExists`: If the target sheet exists, delete it first.
+- `beforeSourceSheet`: Move target sheet to the left of source sheet after copying, otherwise the right of source sheet.
+- `password`: The password of the Excel file, if there is one.
+
 ### `excel_get_tables`
 Get all the table names of the specified Excel file.
 #### parameters
