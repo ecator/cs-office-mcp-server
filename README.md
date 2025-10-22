@@ -268,6 +268,7 @@ Read the contents of the mails in the inbox of Outlook.
 #### parameters
 - `startItem`: The starting position of the item to be read, which starts from 1.
 - `maxItems`: Maximum number of mails to be read.
+- `newestFirst`: The sorting order of the returned mails, specifically prioritizing items that were received most recently.
 
 ### `outlook_send_mail`
 Send a mail using Outlook.
@@ -286,3 +287,4 @@ Find the contents of the mails in the inbox of Outlook.
 - `searchValue`: The value to be searched for will be searched in the subject and body. No filtering if empty.
 - `senders`: Email or name of senders need to be specified. No filtering if empty.
 - `maxItems`: Maximum number of mails to return.
+- `newestFirst`: The sorting order of the returned mails, specifically prioritizing items that were received most recently.

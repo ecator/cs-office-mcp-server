@@ -81,7 +81,8 @@ public static class OutlookTools
 
     [McpServerTool(Name = "outlook_read_inbox_mails"), Description("Read the contents of the mails in the inbox of Outlook.")]
     public static Dictionary<string, List<MailItemInfo>> ReadInboxMails([Description(@"The starting position of the item to be read, which starts from 1.")] int startItem = 1
-        , [Description(@"Maximum number of mails to be read.")] int maxItems = 10)
+        , [Description(@"Maximum number of mails to be read.")] int maxItems = 10
+        , [Description(@"The sorting order of the returned mails, specifically prioritizing items that were received most recently.")] bool newestFirst = true)
     {
         var data = new Dictionary<string, List<MailItemInfo>>();
         data["inbox"] = new List<MailItemInfo>();
@@ -90,6 +91,7 @@ public static class OutlookTools
         {
             var inbox = session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox);
             var items = inbox.Items;
+            items.Sort("[ReceivedTime]", newestFirst);
             session.RegisterComObject(items);
             for (var i = startItem; i <= items.Count && count < maxItems; i++)
             {
@@ -119,7 +121,8 @@ public static class OutlookTools
     [McpServerTool(Name = "outlook_find_inbox_mails"), Description("Find the contents of the mails in the inbox of Outlook.")]
     public static Dictionary<string, List<MailItemInfo>> FindInboxMails([Description(@"The value to be searched for will be searched in the subject and body. No filtering if empty.")] string searchValue = ""
         , [Description(@"Email or name of senders need to be specified. No filtering if empty.")] string[] senders = null
-        , [Description(@"Maximum number of mails to return.")] int maxItems = 10)
+        , [Description(@"Maximum number of mails to return.")] int maxItems = 10
+        , [Description(@"The sorting order of the returned mails, specifically prioritizing items that were received most recently.")] bool newestFirst = true)
     {
         var data = new Dictionary<string, List<MailItemInfo>>();
         data["found_inbox"] = new List<MailItemInfo>();
@@ -135,6 +138,8 @@ public static class OutlookTools
                 searchValue = searchValue.Replace("'", "''");
                 foundItems = items.Restrict($"@SQL=(\"http://schemas.microsoft.com/mapi/proptag/0x0037001f\" ci_phrasematch '{searchValue}' OR \"http://schemas.microsoft.com/mapi/proptag/0x1000001e\" ci_phrasematch '{searchValue}')");
             }
+            session.RegisterComObject(foundItems);
+            foundItems.Sort("[ReceivedTime]", newestFirst);
             for (var i = 1; i <= foundItems.Count && count < maxItems; i++)
             {
                 var item = foundItems[i];

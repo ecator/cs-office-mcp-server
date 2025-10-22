@@ -20,14 +20,16 @@ public class OutlookTest : TestBase
     }
 
     [TestMethod]
-    [DataRow(1, 1)]
-    [DataRow(2, 1)]
-    [DataRow(3, 1)]
-    [DataRow(4, 1)]
-    [DataRow(5, 1)]
-    public void TestReadInboxMails(int startItem, int maxItems)
+    [DataRow(1, 1, true)]
+    [DataRow(2, 1, true)]
+    [DataRow(3, 1, true)]
+    [DataRow(4, 1, true)]
+    [DataRow(5, 1, true)]
+    [DataRow(1, 2, true)]
+    [DataRow(1, 2, false)]
+    public void TestReadInboxMails(int startItem, int maxItems, bool newestFirst)
     {
-        var response = OutlookTools.ReadInboxMails(startItem, maxItems);
+        var response = OutlookTools.ReadInboxMails(startItem, maxItems, newestFirst);
         TestContext.WriteLine(JsonConvert.SerializeObject(response));
     }
 
@@ -43,12 +45,15 @@ public class OutlookTest : TestBase
         TestContext.WriteLine(JsonConvert.SerializeObject(response));
     }
     [TestMethod]
-    [DataRow("", null, 1)]
-    [DataRow("", new string[] { "onedrive" }, 1)]
-    [DataRow("云环境", null, 1)]
-    public void TestFindInboxMails(string searchValue, string[] senders, int maxItems)
+    [DataRow("", null, 1, true)]
+    [DataRow("", new string[] { "onedrive" }, 2, true)]
+    [DataRow("", new string[] { "onedrive" }, 2, false)]
+    [DataRow("云环境", null, 1, true)]
+    [DataRow("记忆", null, 2, true)]
+    [DataRow("记忆", null, 2, false)]
+    public void TestFindInboxMails(string searchValue, string[] senders, int maxItems, bool newestFirst)
     {
-        var response = OutlookTools.FindInboxMails(searchValue, senders, maxItems);
+        var response = OutlookTools.FindInboxMails(searchValue, senders, maxItems, newestFirst);
         TestContext.WriteLine(JsonConvert.SerializeObject(response));
     }
 
