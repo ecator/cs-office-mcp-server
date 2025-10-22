@@ -70,6 +70,7 @@ public class ExcelTest: TestBase
 
     [TestMethod]
     [DataRow("wk1.xlsm", "Sheet1", "B", 1, "B", 1, null)]
+    [DataRow("wk1.xlsm", "Sheet1", "B", 1, "C", 20, null)]
     [DataRow("wk1.xlsm", "Sheet1", "B", 1, null, null, null)]
     [DataRow("wk1.xlsm", "Sheet1", "B", 1, "B", null, null)]
     [DataRow("wk1.xlsm", "Sheet1", "B", 1, null, 2, null)]

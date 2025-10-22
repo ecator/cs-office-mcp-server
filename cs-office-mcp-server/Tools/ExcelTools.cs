@@ -120,7 +120,7 @@ public static class ExcelTools
         return data.ToString();
     }
 
-    [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet.")]
+    [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
     public static Dictionary<string, object> Read([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The first column as a letter.(such as A)")] string startColumn = "A"
@@ -139,13 +139,17 @@ public static class ExcelTools
             foreach (Excel.Range r in range)
             {
                 session.RegisterComObject(r);
+                if (r.Value is null)
+                {
+                    continue;
+                }
                 values[r.Address.Replace("$", "")] = r.Value;
             }
         }
 
         return values;
     }
-    [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet.")]
+    [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
     public static Dictionary<string, object> ReadUsedRange([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The password of the Excel file, if there is one.")] string? password = null)
@@ -161,6 +165,10 @@ public static class ExcelTools
             foreach (Excel.Range r in range)
             {
                 session.RegisterComObject(r);
+                if (r.Value is null)
+                {
+                    continue;
+                }
                 values[r.Address.Replace("$", "")] = r.Value;
             }
         }

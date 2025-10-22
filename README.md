@@ -49,7 +49,7 @@ Run a macro of the specified Excel file.
 - `password`: The password of the Excel file, if there is one.
 
 ### `excel_read_used_range`
-Read the value of used range of cells from the specified worksheet.
+Read the value of used range of cells from the specified worksheet. If a cell is empty, it will not be included in the returned result set.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `sheetName*`: The sheet name of the Excel file.
@@ -121,7 +121,7 @@ Find value from Excel files.
 - `password`: The password of the Excel files, if there is one and all are the same.
 
 ### `excel_read`
-Read the value of a cell or a range of cells from the specified worksheet.
+Read the value of a cell or a range of cells from the specified worksheet. If a cell is empty, it will not be included in the returned result set.
 #### parameters
 - `fullName*`: The full path of the Excel file.
 - `sheetName*`: The sheet name of the Excel file.
