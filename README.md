@@ -34,6 +34,23 @@ Then add the following configuration to the MCP servers configuration.
 }
 ```
 
+Please refer to the following if you are using [Codex](https://github.com/openai/codex/blob/main/docs/config.md#mcp-integration).
+
+> `%USERPROFILE%\.codex\config.toml`
+
+```toml
+[mcp_servers.office]
+command = 'cmd'
+args = [
+    "/c",
+    'DRIVER:\PATH\TO\cs-office-mcp-server.exe',
+]
+env = { SystemRoot = 'C:\Windows' }
+startup_timeout_sec = 300
+tool_timeout_sec = 300
+enabled = true
+```
+
 Note that this is only supported on Windows with Office 2016 (64-bit version) or above installed!
 
 # Tools
