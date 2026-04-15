@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Interop.Word;
 using ModelContextProtocol;
 using System;
@@ -300,6 +300,59 @@ public class ExcelSession : Session<Excel.Application>
         var range = sh.Range[startRange, endRange];
         RegisterComObject(range);
         return range;
+    }
+
+    /// <summary>
+    /// Reads all values from a range in a single COM call and returns a 1-based 2D array.
+    /// Handles both single-cell (scalar) and multi-cell (array) cases.
+    /// </summary>
+    /// <param name="range">The Excel range to read.</param>
+    /// <returns>A 1-based 2D object array containing the range values.</returns>
+    public static object[,] GetRangeValues(Excel.Range range)
+    {
+        var value = range.Value;
+        if (value is object[,] array)
+        {
+            return array;
+        }
+        // Single cell case: wrap in a 1-based 2D array
+        var result = (object[,])Array.CreateInstance(typeof(object), new[] { 1, 1 }, new[] { 1, 1 });
+        result[1, 1] = value;
+        return result;
+    }
+
+
+    /// <summary>
+    /// Converts a 1-based column index to an Excel column letter (e.g., 1 → "A", 27 → "AA").
+    /// </summary>
+    /// <param name="columnIndex">1-based column index</param>
+    /// <returns>Excel column letter</returns>
+    public static string ColumnIndexToLetter(int columnIndex)
+    {
+        var result = new StringBuilder();
+        while (columnIndex > 0)
+        {
+            columnIndex--;
+            result.Insert(0, (char)('A' + columnIndex % 26));
+            columnIndex /= 26;
+        }
+        return result.ToString();
+    }
+
+
+    /// <summary>
+    /// Converts an Excel column letter to a 1-based column index (e.g., "A" → 1, "AA" → 27).
+    /// </summary>
+    /// <param name="columnLetter">Excel column letter</param>
+    /// <returns>1-based column index</returns>
+    public static int ColumnLetterToIndex(string columnLetter)
+    {
+        int index = 0;
+        foreach (char c in columnLetter.ToUpper())
+        {
+            index = index * 26 + (c - 'A' + 1);
+        }
+        return index;
     }
 
 }

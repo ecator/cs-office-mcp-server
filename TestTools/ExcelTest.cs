@@ -31,6 +31,24 @@ public class ExcelTest: TestBase
 
     }
 
+    [TestMethod]
+    [DataRow("wk1.xlsm", "T_TEST2", null)]
+    public void TestGetTableContent(string fileName, string tableName, string password)
+    {
+
+        var fullName = Path.Combine(TestDataDirectory, fileName);
+        var response = ExcelTools.GetTableContent(fullName, tableName, password);
+        var expectedResponse = @"Table T_TEST2 is in sheet Sheet3, address L19:N22, total 3 data rows and 3 columns.
+ID|NAME|COMMENT
+---|---|---
+1|张三|
+2|李四|A\|B<br>C
+3|王五|
+";
+        Assert.AreEqual(expectedResponse, response);
+        TestContext.WriteLine(response);
+
+    }
 
     [TestMethod]
     [DataRow(new string[] { "wk1.xlsm", "wk0.xls" }, "你好", true,true, null)]
@@ -186,6 +204,7 @@ public class ExcelTest: TestBase
 
     [TestMethod]
     [DataRow("wk1.xlsm", "Sheet1", null)]
+    [DataRow("wk1.xlsm", "Sheet2", null)]
     public void TestReadUsedRange(string fileName, string sheetName, string password)
     {
         var fullName = Path.Combine(TestDataDirectory, fileName);

@@ -63,7 +63,6 @@ public static class ExcelTools
     {
         Excel.ListObject table = null;
         Excel.Range range;
-        Excel.Range cells;
         StringBuilder data = new StringBuilder();
         string address;
         string sheetName;
@@ -89,26 +88,26 @@ public static class ExcelTools
             session.RegisterComObject(rows);
             var cols = range.Columns;
             session.RegisterComObject(cols);
-            cells = range.Cells;
-            session.RegisterComObject(cells);
             Excel.Worksheet sh = table.Parent as Excel.Worksheet;
             session.RegisterComObject(sh);
             sheetName = sh.Name;
             address = range.Address[false,false];
-            data.AppendLine($"Table {tableName} is in sheet {sheetName}, address {address}, total {rows.Count - 1} data rows and {cols.Count} columns.");
-            for (int i = 1; i <= rows.Count; i++)
+            int rowCount = rows.Count;
+            int colCount = cols.Count;
+            data.AppendLine($"Table {tableName} is in sheet {sheetName}, address {address}, total {rowCount - 1} data rows and {colCount} columns.");
+            // Bulk read: one COM call for the entire range instead of per-cell access
+            object[,] rangeValues = ExcelSession.GetRangeValues(range);
+            for (int i = 1; i <= rowCount; i++)
             {
-                var lines = new string[cols.Count];
+                var lines = new string[colCount];
                 if (i == 2)
                 {
                     Array.Fill(lines, "---");
                     data.AppendLine(string.Join("|", lines));
                 }
-                for (int j = 1; j <= cols.Count; j++)
+                for (int j = 1; j <= colCount; j++)
                 {
-                    Excel.Range cell = cells[i, j];
-                    session.RegisterComObject(cell);
-                    string s = Convert.ToString(cell.Value) ?? "";
+                    string s = Convert.ToString(rangeValues[i, j]) ?? "";
                     s = session.EscapeMarkdownTableValue(s);
                     lines[j - 1] = s;
                 }
@@ -136,14 +135,25 @@ public static class ExcelTools
             var wk = session.OpenWorkbook(fullName, true, password);
             var sh = session.GetSheet(wk, sheetName);
             var range = session.GetRange(sh, startColumn, startRow, endColumn, endRow);
-            foreach (Excel.Range r in range)
+            // Bulk read: one COM call for the entire range instead of per-cell access
+            object[,] data = ExcelSession.GetRangeValues(range);
+            int baseRow = range.Row;
+            int baseCol = range.Column;
+            var rows = range.Rows;
+            session.RegisterComObject(rows);
+            var cols = range.Columns;
+            session.RegisterComObject(cols);
+            int rowCount = rows.Count;
+            int colCount = cols.Count;
+            for (int i = 1; i <= rowCount; i++)
             {
-                session.RegisterComObject(r);
-                if (r.Value is null)
+                for (int j = 1; j <= colCount; j++)
                 {
-                    continue;
+                    var val = data[i, j];
+                    if (val is null) continue;
+                    string address = $"{ExcelSession.ColumnIndexToLetter(baseCol + j - 1)}{baseRow + i - 1}";
+                    values[address] = val;
                 }
-                values[r.Address.Replace("$", "")] = r.Value;
             }
         }
 
@@ -162,14 +172,25 @@ public static class ExcelTools
             var sh = session.GetSheet(wk, sheetName);
             var range = sh.UsedRange;
             session.RegisterComObject(range);
-            foreach (Excel.Range r in range)
+            // Bulk read: one COM call for the entire range instead of per-cell access
+            object[,] data = ExcelSession.GetRangeValues(range);
+            int baseRow = range.Row;
+            int baseCol = range.Column;
+            var rows = range.Rows;
+            session.RegisterComObject(rows);
+            var cols = range.Columns;
+            session.RegisterComObject(cols);
+            int rowCount = rows.Count;
+            int colCount = cols.Count;
+            for (int i = 1; i <= rowCount; i++)
             {
-                session.RegisterComObject(r);
-                if (r.Value is null)
+                for (int j = 1; j <= colCount; j++)
                 {
-                    continue;
+                    var val = data[i, j];
+                    if (val is null) continue;
+                    string address = $"{ExcelSession.ColumnIndexToLetter(baseCol + j - 1)}{baseRow + i - 1}";
+                    values[address] = val;
                 }
-                values[r.Address.Replace("$", "")] = r.Value;
             }
         }
 
@@ -475,18 +496,31 @@ public static class ExcelTools
                 sh = shNew;
                 sh.Name = sheetName;
             }
-            if(data != null)
+            if(data != null && data.Length > 0)
             {
-                var range = sh.Range[$"{startColumn}{startRow}"];
-                session.RegisterComObject(range);
-                for (var i = 0; i < data.Length; i++)
+                int dataRowCount = data.Length;
+                int maxColCount = 0;
+                for (var i = 0; i < dataRowCount; i++)
                 {
-                    for (var j = 0; j < data[i].Length; j++)
+                    if (data[i].Length > maxColCount) maxColCount = data[i].Length;
+                }
+                if (maxColCount > 0)
+                {
+                    // Build 2D array for bulk write (one COM call instead of per-cell)
+                    object[,] values = new object[dataRowCount, maxColCount];
+                    for (var i = 0; i < dataRowCount; i++)
                     {
-                        var cell = range.Offset[i, j];
-                        session.RegisterComObject(cell);
-                        cell.Value = data[i][j];
+                        for (var j = 0; j < data[i].Length; j++)
+                        {
+                            values[i, j] = data[i][j];
+                        }
                     }
+                    int startColIdx = ExcelSession.ColumnLetterToIndex(startColumn);
+                    string endColLetter = ExcelSession.ColumnIndexToLetter(startColIdx + maxColCount - 1);
+                    int endRowNum = (int)startRow + dataRowCount - 1;
+                    var writeRange = sh.Range[$"{startColumn}{startRow}", $"{endColLetter}{endRowNum}"];
+                    session.RegisterComObject(writeRange);
+                    writeRange.Value2 = values;
                 }
             }
             if (newWk)
