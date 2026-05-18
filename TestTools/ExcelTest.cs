@@ -97,7 +97,7 @@ ID|NAME|COMMENT
     {
         var fullName = Path.Combine(TestDataDirectory, fileName);
         var values = ExcelTools.Read(fullName, sheetName, startColumn, startRow, endColumn, endRow, password);
-        TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+        TestContext.WriteLine(values);
     }
 
     [TestMethod]
@@ -209,7 +209,7 @@ ID|NAME|COMMENT
     {
         var fullName = Path.Combine(TestDataDirectory, fileName);
         var values = ExcelTools.ReadUsedRange(fullName, sheetName, password);
-        TestContext.WriteLine(string.Join("\n", values.Select(item => $"{item.Key}={Convert.ToString(item.Value)}")));
+        TestContext.WriteLine(values);
     }
 
     [TestMethod]
@@ -227,9 +227,9 @@ ID|NAME|COMMENT
         var fullName = Path.Combine(TestDataDirectory, fileName);
         var data = new string[][]
         {
-            new []{"1","你好",DateTime.Now.ToString() },
-            new []{"2","こんにちは", DateTime.Now.ToString() },
-            new []{"3","天気がいいから\n散歩ししましょう。", DateTime.Now.ToString() }
+            new []{"1","你好",DateTimeOffset.Now.ToUnixTimeSeconds().ToString() },
+            new []{"2","こんにちは", DateTimeOffset.Now.ToUnixTimeSeconds().ToString() },
+            new []{"3","天気がいいから\n散歩ししましょう。", DateTimeOffset.Now.ToUnixTimeSeconds().ToString() }
         };
         if (File.Exists(fullName))
         {
@@ -268,7 +268,9 @@ ID|NAME|COMMENT
         }
         Assert.AreEqual(expectedResponse.ToString(), response);
 
-        var values = ExcelTools.Read(fullName, sheetName, "B", 3, null, null, password);
+        var yaml = ExcelTools.Read(fullName, sheetName, "B", 3, null, null, password);
+        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder().Build();
+        var values = deserializer.Deserialize<System.Collections.Generic.Dictionary<string, object>>(yaml);
         for (var i = 0; i < data.Length; i++)
         {
             for (var j = 0; j < data[i].Length; j++)

@@ -3,6 +3,7 @@ using ModelContextProtocol.Server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using YamlDotNet.Serialization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,6 +16,7 @@ namespace OfficeServer.Tools;
 public static class ExcelTools
 
 {
+    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().Build();
 
     [McpServerTool(Name = "excel_get_sheets"), Description("Get all the sheet names of the specified Excel file.")]
     public static string GetSheets([Description("The full path of the Excel file.")] string fullName, [Description("The password of the Excel file, if there is one.")] string? password = null)
@@ -120,7 +122,7 @@ public static class ExcelTools
     }
 
     [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
-    public static Dictionary<string, object> Read([Description("The full path of the Excel file.")] string fullName
+    public static string Read([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The first column as a letter.(such as A)")] string startColumn = "A"
         , [Description("The first row number.")] int startRow = 1
@@ -157,10 +159,10 @@ public static class ExcelTools
             }
         }
 
-        return values;
+        return _yamlSerializer.Serialize(values);
     }
     [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
-    public static Dictionary<string, object> ReadUsedRange([Description("The full path of the Excel file.")] string fullName
+    public static string ReadUsedRange([Description("The full path of the Excel file.")] string fullName
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The password of the Excel file, if there is one.")] string? password = null)
     {
@@ -194,7 +196,7 @@ public static class ExcelTools
             }
         }
 
-        return values;
+        return _yamlSerializer.Serialize(values);
     }
 
     [McpServerTool(Name = "excel_find"), Description("Find value from Excel files.")]
