@@ -6,3 +6,4 @@ obj/
 TestResults/*
 TestData/write-*
 TestData/save-*
+TestData/~$*
