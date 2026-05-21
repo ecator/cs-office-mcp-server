@@ -12,7 +12,7 @@
 
 # Overview
 
-The MCP Server for operating Office files such as Excel, Word, PowerPoint and Outlook.
+The MCP Server for operating Office files such as Excel, Word, PowerPoint, Outlook, and PDF.
 
 You must install Office 2016 and later versions to use this MCP server.
 
@@ -305,3 +305,28 @@ Find the contents of the mails in the inbox of Outlook.
 - `senders`: Email or name of senders need to be specified. No filtering if empty.
 - `maxItems`: Maximum number of mails to return.
 - `newestFirst`: The sorting order of the returned mails, specifically prioritizing items that were received most recently.
+
+## PDF
+
+### `pdf_get_page_count`
+Get all the number of the pages of the specified PDF file.
+#### parameters
+- `fullName*`: The full path of the PDF file.
+- `password`: The password of the PDF file, if there is one.
+
+### `pdf_read`
+Get the text content of the specified PDF file.
+#### parameters
+- `fullName*`: The full path of the PDF file.
+- `fromPage`: The starting page number to read.
+- `toPage`: The end page number to read. If it's empty, then read up to the last page.
+- `password`: The password of the PDF file, if there is one.
+
+### `pdf_find`
+Find value from PDF files.
+#### parameters
+- `fullNameList*`: The list of full path of PDF files that need to be searched for.
+- `searchValue*`: The value to be searched for which can use wildcard characters like `?`(any single character), `*`(any number of characters), `\` followed by `?`, `*`, or `\`(a question mark, asterisk, or backslash).
+- `matchPart`: Match against any part of part of a larger word when true. Match against the entire words of the search text when false.
+- `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false.
+- `password`: The password of the PDF files, if there is one and all are the same.
