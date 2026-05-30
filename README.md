@@ -330,3 +330,20 @@ Find value from PDF files.
 - `matchPart`: Match against any part of part of a larger word when true. Match against the entire words of the search text when false.
 - `ignoreCase`: Ignoring lower case and upper case differences when true. Case insensitive when false.
 - `password`: The password of the PDF files, if there is one and all are the same.
+
+### `pdf_merge`
+Merge multiple PDF files into a single PDF file.
+#### parameters
+- `fullNameList*`: The list of full path of PDF files to merge.
+- `outputFullName*`: The output full path of the merged PDF file.
+
+### `pdf_extract`
+Extract pages from a PDF file into a new PDF file.
+#### parameters
+- `fullName*`: The full path of the PDF file to extract from.
+- `outputFullName*`: The output full path of the extracted PDF file.
+- `fromPage*`: The starting page number to extract (1-based).
+- `toPage*`: The end page number to extract (1-based).
+- `password`: The password of the PDF file, if there is one.
+
+

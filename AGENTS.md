@@ -58,6 +58,7 @@ The test suite uses MSTest and relies on files in the `TestData/` directory.
   - Add new tests in the `TestTools` project.
   - Use `TestBase` as a foundation for tests requiring access to `TestData/`.
   - Prefer `[DataRow]` for testing tools with various inputs.
+  - **Do NOT run tests proactively.** Please request user consent before running tests (e.g., `dotnet test`), unless the user explicitly states that you can run the tests on your own.
 
 ## Key Directories
 

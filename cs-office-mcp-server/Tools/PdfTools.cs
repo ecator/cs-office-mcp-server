@@ -2,8 +2,11 @@ using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Writer;
 
 namespace OfficeServer.Tools;
 
@@ -134,4 +137,90 @@ public static class PdfTools
         data.Insert(0, $"Found a total of `{totalCount}` results for `{searchValue}` in all files.");
         return data.ToString();
     }
+
+    [McpServerTool(Name = "pdf_merge"), Description("Merge multiple PDF files into a single PDF file.")]
+    public static string Merge([Description("The list of full path of PDF files to merge.")] string[] fullNameList,
+                               [Description("The output full path of the merged PDF file.")] string outputFullName)
+    {
+        if (fullNameList == null || fullNameList.Length == 0)
+        {
+            throw new McpException("The list of full path of PDF files cannot be empty or null.");
+        }
+
+        using (var session = new PdfSession())
+        {
+            var resolvedOutputName = session.CheckFullName(outputFullName, needExist: false);
+            var resolvedInputNames = new string[fullNameList.Length];
+            for (int i = 0; i < fullNameList.Length; i++)
+            {
+                resolvedInputNames[i] = session.CheckFullName(fullNameList[i], needExist: true);
+            }
+
+            try
+            {
+                byte[] mergedBytes = PdfMerger.Merge(resolvedInputNames);
+                File.WriteAllBytes(resolvedOutputName, mergedBytes);
+            }
+            catch (Exception ex)
+            {
+                throw new McpException($"Failed to merge PDF files: {ex.Message}", ex);
+            }
+
+            return $"Successfully merged {resolvedInputNames.Length} PDF files into `{resolvedOutputName}`.";
+        }
+    }
+
+    [McpServerTool(Name = "pdf_extract"), Description("Extract pages from a PDF file into a new PDF file.")]
+    public static string Extract([Description("The full path of the PDF file to extract from.")] string fullName,
+                                 [Description("The output full path of the extracted PDF file.")] string outputFullName,
+                                 [Description("The starting page number to extract (1-based).")] int fromPage = 1,
+                                 [Description("The end page number to extract (1-based). If it's empty, extract up to the last page.")] int? toPage = null,
+                                 [Description("The password of the PDF file, if there is one.")] string? password = null)
+    {
+        using (var session = new PdfSession())
+        {
+            var resolvedInputName = session.CheckFullName(fullName, needExist: true);
+            var resolvedOutputName = session.CheckFullName(outputFullName, needExist: false);
+
+            try
+            {
+                using (var srcDoc = session.OpenDocument(resolvedInputName, password))
+                {
+                    int totalPages = srcDoc.NumberOfPages;
+                    if (!toPage.HasValue)
+                    {
+                        toPage = totalPages;
+                    }
+                    if (fromPage < 1)
+                    {
+                        fromPage = 1;
+                    }
+                    if (toPage.Value > totalPages || fromPage > toPage.Value)
+                    {
+                        throw new McpException($"Invalid page range: {fromPage} to {toPage.Value}. Total pages of the PDF file is {totalPages}.");
+                    }
+
+                    var builder = new PdfDocumentBuilder();
+                    for (int i = fromPage; i <= toPage.Value; i++)
+                    {
+                        builder.AddPage(srcDoc, i);
+                    }
+
+                    byte[] outputBytes = builder.Build();
+                    File.WriteAllBytes(resolvedOutputName, outputBytes);
+                }
+            }
+            catch (McpException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new McpException($"Failed to extract PDF pages: {ex.Message}", ex);
+            }
+
+            return $"Successfully extracted pages {fromPage} to {toPage.Value} from `{resolvedInputName}` into `{resolvedOutputName}`.";
+        }
+    }
 }
+

@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <Authors>Martin</Authors>
     <Company>Martin Cat</Company>
-    <Description>Windows MCP Server for operating Office files</Description>
+    <Description>Windows MCP Server for operating Office/PDF files</Description>
     <Title>OfficeMcpServer</Title>
     <Version>0.8.0</Version>
     <PackageProjectUrl>https://github.com/ecator/cs-office-mcp-server</PackageProjectUrl>

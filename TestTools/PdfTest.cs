@@ -73,4 +73,74 @@ public class PdfTest : TestBase
         TestContext.WriteLine(content);
     }
 
+    [TestMethod]
+    public void TestMerge()
+    {
+        var file1 = Path.Combine(TestDataDirectory, "Agent Skills.pdf");
+        var file2 = Path.Combine(TestDataDirectory, "MCP.pdf");
+        var outputFile = Path.Combine(TestDataDirectory, "MergedOutputTest.pdf");
+
+        if (File.Exists(outputFile))
+        {
+            File.Delete(outputFile);
+        }
+
+        try
+        {
+            var response = PdfTools.Merge(new[] { file1, file2 }, outputFile);
+            Assert.IsTrue(File.Exists(outputFile));
+            Assert.IsTrue(response.Contains("Successfully merged"));
+
+            var pageCountMsg = PdfTools.GetPageCount(outputFile);
+            Assert.IsTrue(pageCountMsg.Contains("Total `4` pages")); // 2 + 2 = 4
+        }
+        finally
+        {
+            if (File.Exists(outputFile))
+            {
+                File.Delete(outputFile);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void TestExtract()
+    {
+        var inputFile = Path.Combine(TestDataDirectory, "Agent Skills.pdf");
+        var outputFile = Path.Combine(TestDataDirectory, "ExtractOutputTest.pdf");
+
+        if (File.Exists(outputFile))
+        {
+            File.Delete(outputFile);
+        }
+
+        try
+        {
+            // Test explicit arguments (pages 1 to 1)
+            var response = PdfTools.Extract(inputFile, outputFile, 1, 1);
+            Assert.IsTrue(File.Exists(outputFile));
+            Assert.IsTrue(response.Contains("Successfully extracted pages 1 to 1"));
+
+            var pageCountMsg = PdfTools.GetPageCount(outputFile);
+            Assert.IsTrue(pageCountMsg.Contains("Total `1` pages"));
+
+            File.Delete(outputFile);
+
+            // Test default arguments (should extract all pages, fromPage = 1, toPage = null -> 2)
+            response = PdfTools.Extract(inputFile, outputFile);
+            Assert.IsTrue(File.Exists(outputFile));
+            Assert.IsTrue(response.Contains("Successfully extracted pages 1 to 2"));
+
+            pageCountMsg = PdfTools.GetPageCount(outputFile);
+            Assert.IsTrue(pageCountMsg.Contains("Total `2` pages"));
+        }
+        finally
+        {
+            if (File.Exists(outputFile))
+            {
+                File.Delete(outputFile);
+            }
+        }
+    }
 }
+
